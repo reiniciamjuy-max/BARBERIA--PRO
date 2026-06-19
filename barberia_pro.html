@@ -1,0 +1,1990 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>BarberStyle Pro</title>
+<link rel="manifest" href="#" id="manifest-link">
+<meta name="theme-color" content="#0A0A0A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --black:#0A0A0A;--charcoal:#141414;--graphite:#1E1E1E;--card:#252525;
+  --border:#2E2E2E;--gold:#C9A84C;--gold-lt:#E2C47A;--gold-dim:rgba(201,168,76,0.15);
+  --white:#F4F0E8;--muted:#7A7470;--text:#D8D2C8;
+  --red:#C0392B;--green:#27AE60;--blue:#2980B9;
+  --accent1:var(--gold);--accent2:var(--gold-lt);
+  --bg-main:var(--black);--bg-card:var(--graphite);--bg-header:var(--charcoal);
+  --radius:14px;--radius-sm:8px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg-main);color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;line-height:1.6;min-height:100vh;overflow-x:hidden;}
+#view-app,#view-admin,#view-login,#view-demo-end{display:none;}
+#view-app.active,#view-admin.active,#view-login.active{display:block;}
+
+/* HEADER */
+header{padding:16px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:var(--bg-header);position:sticky;top:0;z-index:100;}
+.logo{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--white);}
+.logo span{color:var(--accent1);}
+.logo-sub{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:.16em;text-transform:uppercase;margin-top:2px;}
+.version-badge{font-family:'DM Mono',monospace;font-size:9px;background:var(--gold-dim);color:var(--accent1);border:1px solid var(--accent1);border-radius:4px;padding:2px 7px;letter-spacing:.1em;}
+.admin-link{font-size:11px;color:var(--muted);cursor:pointer;padding:5px 9px;border:1px solid var(--border);border-radius:6px;transition:all .2s;margin-left:6px;}
+.admin-link:hover{color:var(--accent1);border-color:var(--accent1);}
+.header-right{display:flex;align-items:center;gap:5px;flex-wrap:wrap;justify-content:flex-end;}
+
+/* PROGRESS */
+.progress-bar{display:flex;gap:4px;padding:9px 18px;background:var(--bg-header);border-bottom:1px solid var(--border);}
+.step-dot{height:3px;flex:1;border-radius:2px;background:var(--border);transition:background .4s;}
+.step-dot.active{background:var(--accent1);}
+.step-dot.done{background:var(--accent2);}
+
+/* MAIN */
+main{max-width:480px;margin:0 auto;padding:22px 16px 110px;}
+.screen{display:none;animation:fadeUp .3s ease;}
+.screen.active{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+
+/* TYPOGRAPHY */
+.screen-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--accent1);letter-spacing:.2em;text-transform:uppercase;margin-bottom:6px;}
+h2{font-family:'Playfair Display',serif;font-size:24px;font-weight:600;color:var(--white);line-height:1.25;margin-bottom:6px;}
+.subtitle{color:var(--muted);font-size:13px;margin-bottom:20px;}
+hr.divider{border:none;border-top:1px solid var(--border);margin:16px 0;}
+
+/* BUTTONS */
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 18px;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;border:none;transition:all .2s;width:100%;letter-spacing:.01em;}
+.btn-gold{background:var(--accent1);color:#0A0A0A;}
+.btn-gold:hover{background:var(--accent2);transform:translateY(-1px);}
+.btn-ghost{background:var(--graphite);color:var(--text);border:1px solid var(--border);}
+.btn-ghost:hover{background:var(--card);}
+.btn-red{background:var(--red);color:#fff;}
+.btn-green{background:var(--green);color:#fff;}
+.btn-blue{background:var(--blue);color:#fff;}
+.btn-sm{padding:7px 13px;font-size:12px;width:auto;}
+.btn:disabled{opacity:.35;cursor:not-allowed;transform:none!important;}
+
+/* PHOTO */
+.photo-zone{border:1.5px dashed var(--border);border-radius:var(--radius);padding:30px 16px;text-align:center;cursor:pointer;transition:border-color .25s,background .25s;background:var(--graphite);display:block;}
+.photo-zone:hover{border-color:var(--accent1);background:var(--gold-dim);}
+.photo-zone.has-photo{border-style:solid;border-color:var(--accent1);}
+.photo-zone input[type="file"]{display:none;}
+#preview-img{width:100%;max-height:240px;object-fit:cover;border-radius:var(--radius-sm);display:none;}
+.photo-icon{font-size:36px;margin-bottom:8px;display:block;}
+.photo-cta{font-family:'Playfair Display',serif;font-size:16px;color:var(--white);margin-bottom:4px;}
+.photo-hint{font-size:11px;color:var(--muted);}
+.photo-actions{display:none;gap:10px;margin-top:12px;}
+
+/* AI ANALYSIS BOX */
+.ai-box{background:var(--graphite);border:1px solid var(--accent1);border-radius:var(--radius);padding:16px 18px;margin:16px 0;display:none;}
+.ai-box.show{display:block;animation:fadeUp .3s ease;}
+.ai-box-title{font-family:'DM Mono',monospace;font-size:10px;color:var(--accent1);letter-spacing:.15em;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.ai-loading{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:13px;}
+.ai-spinner{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--accent1);border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.ai-result{font-size:13px;color:var(--text);line-height:1.7;}
+.ai-tag{display:inline-block;background:var(--gold-dim);color:var(--accent1);border:1px solid var(--accent1);border-radius:20px;font-size:11px;padding:2px 10px;margin:3px 3px 3px 0;font-family:'DM Mono',monospace;}
+.ai-recommended{border:1.5px solid var(--accent1)!important;position:relative;}
+.ai-recommended::before{content:'⭐ IA';position:absolute;top:-10px;left:10px;background:var(--accent1);color:#0A0A0A;font-size:9px;font-weight:700;padding:1px 7px;border-radius:4px;font-family:'DM Mono',monospace;letter-spacing:.05em;}
+.btn-ai{background:linear-gradient(135deg,var(--accent1),var(--gold-lt));color:#0A0A0A;font-weight:600;}
+.btn-ai:hover{opacity:.9;transform:translateY(-1px);}
+
+/* PROFILE */
+.profile-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;}
+.profile-card{background:var(--graphite);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px 10px;text-align:center;cursor:pointer;transition:all .2s;}
+.profile-card:hover,.profile-card.selected{border-color:var(--accent1);background:var(--gold-dim);}
+.profile-emoji{font-size:28px;display:block;margin-bottom:6px;transition:transform .2s;}
+.profile-card.selected .profile-emoji{transform:scale(1.1);}
+.profile-name{font-size:12px;color:var(--text);font-weight:500;}
+.profile-age{font-size:10px;color:var(--muted);margin-top:2px;}
+
+/* TABS */
+.tab-nav{display:flex;background:var(--graphite);border:1px solid var(--border);border-radius:var(--radius-sm);padding:4px;margin-bottom:14px;}
+.tab-btn{flex:1;padding:7px 3px;border:none;background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;cursor:pointer;border-radius:6px;transition:all .2s;}
+.tab-btn.active{background:var(--accent1);color:#0A0A0A;}
+
+/* STYLE GRID */
+.style-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px;}
+.style-card{background:var(--graphite);border:1.5px solid var(--border);border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:all .2s;position:relative;}
+.style-card:hover{border-color:var(--accent1);transform:translateY(-2px);}
+.style-card.selected{border-color:var(--accent1);}
+.style-card.selected::after,.color-card.selected::after,.product-card.selected::after{content:'✓';position:absolute;top:7px;right:7px;background:var(--accent1);color:#0A0A0A;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;}
+.style-thumb{width:100%;height:100px;background:var(--card);display:flex;align-items:center;justify-content:center;font-size:36px;overflow:hidden;}
+.style-thumb img{width:100%;height:100%;object-fit:cover;}
+.style-info{padding:9px 11px 11px;}
+.style-name{font-family:'Playfair Display',serif;font-size:13px;color:var(--white);margin-bottom:2px;}
+.style-desc{font-size:11px;color:var(--muted);}
+.style-price{font-size:12px;color:var(--accent1);margin-top:3px;font-weight:500;}
+
+/* COLOR GRID */
+.color-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;}
+.color-card{border:1.5px solid var(--border);border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:all .2s;position:relative;}
+.color-card:hover{border-color:var(--accent1);transform:translateY(-2px);}
+.color-card.selected{border-color:var(--accent1);}
+.color-swatch{height:46px;width:100%;}
+.color-name{font-size:10px;color:var(--text);padding:5px 4px;text-align:center;background:var(--graphite);}
+
+/* TENDENCIAS */
+.tendencias-box{background:var(--graphite);border:1px solid var(--accent1);border-radius:var(--radius);padding:16px 18px;margin-bottom:18px;display:none;}
+.tendencias-box.show{display:block;animation:fadeUp .35s ease;}
+.tendencias-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.tendencias-title{font-family:'DM Mono',monospace;font-size:10px;color:var(--accent1);letter-spacing:.18em;text-transform:uppercase;}
+.tendencias-season{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;}
+.tendencia-item{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--border);}
+.tendencia-item:last-child{border-bottom:none;padding-bottom:0;}
+.tendencia-rank{font-family:'Playfair Display',serif;font-size:22px;color:var(--accent1);font-weight:700;line-height:1;flex-shrink:0;width:28px;}
+.tendencia-info{flex:1;}
+.tendencia-name{font-family:'Playfair Display',serif;font-size:14px;color:var(--white);margin-bottom:2px;}
+.tendencia-desc{font-size:11px;color:var(--muted);line-height:1.5;}
+.tendencia-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px;}
+.tendencia-tag{font-size:9px;font-family:'DM Mono',monospace;background:var(--gold-dim);color:var(--accent1);border-radius:10px;padding:2px 8px;letter-spacing:.05em;}
+.tendencias-loading{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:13px;padding:8px 0;}
+.trend-badge{position:absolute;top:-8px;left:8px;background:linear-gradient(135deg,var(--accent1),var(--accent2));color:#0A0A0A;font-size:9px;font-weight:700;padding:2px 8px;border-radius:4px;font-family:'DM Mono',monospace;letter-spacing:.05em;white-space:nowrap;}
+.style-card.trending{border-color:var(--accent1);position:relative;}
+.style-card.ai-recommended.trending::before{content:'🔥 TENDENCIA';}
+.style-card.trending:not(.ai-recommended)::before{content:'🔥 TENDENCIA';position:absolute;top:-10px;left:8px;background:linear-gradient(135deg,var(--accent1),var(--accent2));color:#0A0A0A;font-size:9px;font-weight:700;padding:2px 8px;border-radius:4px;font-family:'DM Mono',monospace;letter-spacing:.05em;}
+.product-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px;}
+.product-card{background:var(--graphite);border:1.5px solid var(--border);border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:all .2s;position:relative;}
+.product-card:hover{border-color:var(--accent1);transform:translateY(-2px);}
+.product-card.selected{border-color:var(--accent1);}
+.product-thumb{width:100%;height:80px;background:var(--card);display:flex;align-items:center;justify-content:center;font-size:32px;}
+.product-info{padding:8px 10px 10px;}
+.product-name{font-family:'Playfair Display',serif;font-size:13px;color:var(--white);margin-bottom:2px;}
+.product-desc{font-size:11px;color:var(--muted);}
+.product-price{font-size:12px;color:var(--accent1);margin-top:3px;font-weight:500;}
+
+/* GALLERY */
+.gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:16px;}
+.gallery-item{aspect-ratio:1;border-radius:var(--radius-sm);overflow:hidden;background:var(--graphite);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:26px;}
+.gallery-item img{width:100%;height:100%;object-fit:cover;}
+.gallery-empty{grid-column:1/-1;text-align:center;padding:24px;color:var(--muted);font-size:13px;}
+
+/* STARS */
+.stars-row{display:flex;gap:8px;margin-bottom:12px;}
+.star{font-size:26px;cursor:pointer;transition:transform .15s;filter:grayscale(1);opacity:.5;}
+.star.active{filter:none;opacity:1;transform:scale(1.1);}
+.review-card{background:var(--graphite);border:1px solid var(--border);border-radius:var(--radius);padding:13px 15px;margin-bottom:9px;}
+.review-stars{color:var(--accent1);font-size:13px;margin-bottom:4px;}
+.review-text{font-size:13px;color:var(--text);}
+.review-meta{font-size:10px;color:var(--muted);margin-top:5px;font-family:'DM Mono',monospace;}
+
+/* CALENDAR */
+.calendar-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.cal-month{font-family:'Playfair Display',serif;font-size:16px;color:var(--white);}
+.cal-arrow{background:var(--graphite);border:1px solid var(--border);color:var(--text);padding:5px 11px;border-radius:6px;cursor:pointer;font-size:13px;transition:all .2s;}
+.cal-arrow:hover{border-color:var(--accent1);color:var(--accent1);}
+.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:14px;}
+.cal-dow{text-align:center;font-size:9px;color:var(--muted);font-family:'DM Mono',monospace;padding:3px 0;text-transform:uppercase;}
+.cal-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:7px;font-size:12px;cursor:pointer;border:1px solid transparent;transition:all .2s;background:transparent;color:var(--text);}
+.cal-day.empty{cursor:default;}
+.cal-day.past{color:var(--border);cursor:not-allowed;}
+.cal-day.available{background:var(--graphite);border-color:var(--border);}
+.cal-day.available:hover{border-color:var(--accent1);color:var(--accent1);}
+.cal-day.selected{background:var(--accent1);color:#0A0A0A;border-color:var(--accent1);font-weight:700;}
+.cal-day.today{border-color:var(--accent2);}
+.cal-day.past,.cal-day.unavailable{color:var(--border);cursor:not-allowed;}
+.slots-title{font-family:'DM Mono',monospace;font-size:10px;color:var(--accent1);letter-spacing:.15em;text-transform:uppercase;margin-bottom:9px;}
+.slots-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:16px;}
+.slot{padding:8px 4px;border:1px solid var(--border);border-radius:6px;text-align:center;font-size:12px;cursor:pointer;background:var(--graphite);color:var(--text);transition:all .2s;}
+.slot:hover{border-color:var(--accent1);color:var(--accent1);}
+.slot.selected{background:var(--accent1);color:#0A0A0A;border-color:var(--accent1);font-weight:600;}
+.slot.taken{opacity:.3;cursor:not-allowed;text-decoration:line-through;}
+.no-slots{text-align:center;padding:18px;color:var(--muted);font-size:13px;}
+
+/* SUMMARY */
+.summary-photo{width:100%;max-height:160px;object-fit:cover;border-radius:var(--radius);margin-bottom:14px;border:1px solid var(--border);display:none;}
+.summary-block{background:var(--graphite);border:1px solid var(--border);border-radius:var(--radius);padding:13px 16px;margin-bottom:10px;}
+.summary-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);}
+.summary-row:last-child{border-bottom:none;padding-bottom:0;}
+.summary-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;}
+.summary-value{font-family:'Playfair Display',serif;font-size:13px;color:var(--white);text-align:right;max-width:60%;}
+.empty-val{color:var(--muted);font-family:'DM Sans',sans-serif;font-size:12px;font-style:italic;}
+.total-row{background:var(--gold-dim);border:1px solid var(--accent1);border-radius:var(--radius-sm);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.total-label{font-size:12px;color:var(--accent1);text-transform:uppercase;letter-spacing:.1em;}
+.total-val{font-family:'Playfair Display',serif;font-size:20px;color:var(--accent1);font-weight:700;}
+.whatsapp-btn{background:#25D366;color:#fff;display:flex;align-items:center;justify-content:center;gap:10px;padding:14px;border-radius:var(--radius-sm);font-size:14px;font-weight:500;cursor:pointer;border:none;width:100%;margin-top:4px;transition:all .2s;}
+.whatsapp-btn:hover{background:#1ebe58;transform:translateY(-1px);}
+.confirm-box{background:var(--gold-dim);border:1px solid var(--accent1);border-radius:var(--radius);padding:14px 16px;margin-bottom:12px;display:none;}
+.confirm-box.show{display:block;}
+
+/* FOOTER NAV */
+.footer-nav{position:fixed;bottom:0;left:0;right:0;background:var(--bg-header);border-top:1px solid var(--border);padding:10px 16px;display:flex;gap:10px;max-width:480px;margin:0 auto;z-index:50;}
+
+/* ═══ ADMIN ═══ */
+.admin-header{background:var(--bg-header);border-bottom:1px solid var(--border);padding:13px 18px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.admin-title{font-family:'Playfair Display',serif;font-size:17px;color:var(--white);}
+.admin-title span{color:var(--accent1);}
+.admin-tabs{display:flex;background:var(--graphite);border:1px solid var(--border);border-radius:var(--radius-sm);padding:3px;margin:12px 16px 0;overflow-x:auto;gap:2px;}
+.admin-tab{flex:1;min-width:60px;padding:7px 4px;border:none;background:transparent;color:var(--muted);font-size:10px;cursor:pointer;border-radius:5px;transition:all .2s;font-family:'DM Sans',sans-serif;white-space:nowrap;}
+.admin-tab.active{background:var(--accent1);color:#0A0A0A;font-weight:600;}
+.admin-body{max-width:600px;margin:0 auto;padding:14px 16px 60px;}
+.admin-panel{display:none;}
+.admin-panel.active{display:block;}
+.admin-section{background:var(--graphite);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px;}
+.admin-section-title{font-family:'DM Mono',monospace;font-size:10px;color:var(--accent1);letter-spacing:.18em;text-transform:uppercase;margin-bottom:11px;}
+.field-group{margin-bottom:11px;}
+.field-label{font-size:12px;color:var(--muted);margin-bottom:5px;display:block;}
+.field-input{width:100%;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 12px;color:var(--white);font-family:'DM Sans',sans-serif;font-size:14px;transition:border-color .2s;}
+.field-input:focus{outline:none;border-color:var(--accent1);}
+.field-input::placeholder{color:var(--muted);}
+textarea.field-input{resize:vertical;min-height:64px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.form-row-3{display:grid;grid-template-columns:1fr 1fr 70px;gap:8px;}
+
+/* COLOR THEME PICKER */
+.theme-swatches{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+.theme-swatch{width:36px;height:36px;border-radius:8px;cursor:pointer;border:2px solid transparent;transition:all .2s;position:relative;}
+.theme-swatch:hover,.theme-swatch.active{border-color:var(--white);transform:scale(1.1);}
+.theme-swatch.active::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:700;text-shadow:0 1px 3px rgba(0,0,0,.5);}
+.color-preview{width:100%;height:40px;border-radius:var(--radius-sm);margin-bottom:8px;border:1px solid var(--border);}
+
+/* ADMIN ITEMS */
+.admin-item-list{display:flex;flex-direction:column;gap:7px;margin-bottom:10px;}
+.admin-item{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 12px;display:flex;align-items:center;gap:9px;}
+.admin-item-emoji{font-size:20px;flex-shrink:0;}
+.admin-item-info{flex:1;min-width:0;}
+.admin-item-name{font-size:13px;color:var(--white);font-weight:500;}
+.admin-item-sub{font-size:11px;color:var(--muted);margin-top:1px;}
+.admin-item-price{font-size:11px;color:var(--accent1);margin-top:2px;}
+.admin-item-actions{display:flex;gap:4px;flex-shrink:0;}
+.icon-btn{background:transparent;border:1px solid var(--border);border-radius:5px;padding:4px 7px;cursor:pointer;color:var(--muted);font-size:12px;transition:all .2s;}
+.icon-btn:hover{border-color:var(--accent1);color:var(--accent1);}
+.icon-btn.danger:hover{border-color:var(--red);color:var(--red);}
+.add-form{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;margin-top:9px;display:none;}
+.add-form.open{display:block;}
+
+/* DAY CONFIG */
+.day-row{display:flex;align-items:center;gap:9px;padding:9px 0;border-bottom:1px solid var(--border);}
+.day-row:last-child{border-bottom:none;}
+.day-toggle{position:relative;width:38px;height:20px;flex-shrink:0;}
+.day-toggle input{opacity:0;width:0;height:0;}
+.day-slider{position:absolute;cursor:pointer;inset:0;background:var(--border);border-radius:10px;transition:.3s;}
+.day-slider::before{content:'';position:absolute;height:14px;width:14px;left:3px;bottom:3px;background:var(--muted);border-radius:50%;transition:.3s;}
+.day-toggle input:checked+.day-slider{background:var(--accent1);}
+.day-toggle input:checked+.day-slider::before{transform:translateX(18px);background:#0A0A0A;}
+.day-name{width:76px;font-size:12px;color:var(--text);}
+.day-times{display:flex;gap:6px;align-items:center;flex:1;}
+.day-times input{background:var(--card);border:1px solid var(--border);border-radius:5px;padding:4px 7px;color:var(--white);font-size:11px;width:66px;}
+.day-times input:focus{outline:none;border-color:var(--accent1);}
+.day-times span{color:var(--muted);font-size:10px;}
+.day-disabled .day-times{opacity:.3;pointer-events:none;}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px;}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px;text-align:center;}
+.stat-num{font-family:'Playfair Display',serif;font-size:26px;color:var(--accent1);font-weight:700;}
+.stat-label{font-size:10px;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:.08em;}
+.recent-item{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 12px;margin-bottom:7px;}
+.recent-item-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;}
+.recent-item-name{font-size:13px;color:var(--white);font-weight:500;}
+.recent-item-date{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;}
+.recent-item-detail{font-size:11px;color:var(--muted);}
+.recent-item-total{font-size:12px;color:var(--accent1);font-weight:600;margin-top:3px;}
+
+/* GALLERY ADMIN */
+.gallery-admin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:10px;}
+.gallery-admin-item{aspect-ratio:1;border-radius:var(--radius-sm);overflow:hidden;background:var(--card);border:1px solid var(--border);position:relative;display:flex;align-items:center;justify-content:center;font-size:22px;}
+.gallery-admin-item img{width:100%;height:100%;object-fit:cover;}
+.gallery-del{position:absolute;top:3px;right:3px;background:rgba(0,0,0,.75);color:var(--red);border:none;border-radius:4px;padding:2px 5px;cursor:pointer;font-size:11px;}
+
+/* BLOQUEADOS */
+.swatch-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;}
+.swatch-preset{width:24px;height:24px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:border-color .2s;}
+.swatch-preset:hover,.swatch-preset.sel{border-color:var(--accent1);}
+
+/* LOGIN */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+.login-box{background:var(--bg-header);border:1px solid var(--border);border-radius:var(--radius);padding:28px 24px;width:100%;max-width:310px;text-align:center;}
+.login-icon{font-size:36px;margin-bottom:12px;}
+.login-title{font-family:'Playfair Display',serif;font-size:20px;color:var(--white);margin-bottom:4px;}
+.login-sub{font-size:12px;color:var(--muted);margin-bottom:20px;}
+.login-error{font-size:12px;color:var(--red);margin-top:7px;display:none;}
+
+
+/* DEMO */
+.demo-bar{background:rgba(201,168,76,0.15);border-bottom:1px solid var(--accent1);padding:6px 16px;display:none;align-items:center;justify-content:space-between;}
+.demo-bar.show{display:flex;}
+.demo-bar-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--accent1);letter-spacing:.12em;text-transform:uppercase;}
+.demo-timer{font-family:'DM Mono',monospace;font-size:13px;color:var(--accent1);font-weight:700;}
+.demo-timer.urgent{color:var(--red);animation:pulse .8s infinite;}
+.demo-end-wrap{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;text-align:center;background:var(--black);}
+.demo-end-icon{font-size:52px;margin-bottom:18px;}
+.demo-end-title{font-family:'Playfair Display',serif;font-size:26px;color:var(--white);margin-bottom:8px;}
+.demo-end-sub{font-size:13px;color:var(--muted);margin-bottom:24px;line-height:1.6;max-width:300px;}
+.demo-end-msg{background:var(--graphite);border:1px solid var(--accent1);border-radius:14px;padding:14px 18px;margin-bottom:20px;font-size:13px;color:var(--text);max-width:340px;line-height:1.6;}
+.demo-end-badge{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:.15em;text-transform:uppercase;margin-top:20px;}
+/* PWA INSTALL */
+.install-banner{background:var(--gold-dim);border:1px solid var(--accent1);border-radius:var(--radius-sm);padding:10px 14px;display:none;align-items:center;gap:10px;margin-bottom:14px;}
+.install-banner.show{display:flex;}
+.install-banner p{flex:1;font-size:12px;color:var(--text);}
+.install-banner button{background:var(--accent1);color:#0A0A0A;border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
+
+/* TOAST */
+.toast{position:fixed;bottom:74px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--accent1);color:#0A0A0A;padding:8px 16px;border-radius:20px;font-size:13px;font-weight:500;opacity:0;transition:all .3s;pointer-events:none;z-index:999;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* API KEY INPUT */
+.api-key-banner{background:var(--graphite);border:1px solid var(--accent1);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:14px;}
+.api-key-banner p{font-size:12px;color:var(--muted);margin-bottom:7px;}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+
+<!-- ════ DEMO END ════ -->
+<div id="view-demo-end">
+  <div class="demo-end-wrap">
+    <div class="demo-end-icon">💈</div>
+    <div class="demo-end-title">Demo finalizada</div>
+    <div class="demo-end-sub">El tiempo de prueba ha terminado. Consultá con tu barbero para conocer más.</div>
+    <div class="demo-end-msg" id="demo-end-msg">¡Gracias por probar la app!</div>
+    <div class="demo-end-badge">BarberStyle · Versión Pro</div>
+  </div>
+</div>
+
+<!-- ════ LOGIN ════ -->
+<div id="view-login">
+  <div class="login-wrap">
+    <div class="login-box">
+      <div class="login-icon">🔐</div>
+      <div class="login-title">Panel Admin</div>
+      <div class="login-sub">BarberStyle <strong style="color:var(--accent1)">Pro</strong></div>
+      <input class="field-input" type="password" id="login-pass" placeholder="Contraseña" onkeydown="if(event.key==='Enter')doLogin()">
+      <div class="login-error" id="login-error">Contraseña incorrecta</div>
+      <button class="btn btn-gold" style="margin-top:13px;" onclick="doLogin()">Ingresar</button>
+      <button class="btn btn-ghost" style="margin-top:8px;" onclick="showView('app')">← Volver a la app</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ APP CLIENTE ════ -->
+<div id="view-app">
+  <header>
+    <div>
+      <div class="logo" id="app-logo">Barber<span>Style</span></div>
+      <div class="logo-sub" id="app-tagline">Tu Estilo, Tu Identidad</div>
+    </div>
+    <div class="header-right">
+      <div class="version-badge">PRO</div>
+      <div id="header-step" style="font-size:11px;color:var(--muted);">Paso 1 de 6</div>
+      <div class="admin-link" onclick="showView('login')">⚙️</div>
+    </div>
+  </header>
+  <div class="demo-bar" id="demo-bar">
+    <span class="demo-bar-label">🕐 Modo Demo</span>
+    <span class="demo-timer" id="demo-timer">--:--</span>
+  </div>
+  <div class="progress-bar" id="progress-bar"></div>
+
+  <main>
+    <!-- S1: FOTO + IA -->
+    <div class="screen active" id="screen-1">
+      <div class="screen-label">Paso 1</div>
+      <h2>Tu foto,<br>tu punto de partida</h2>
+      <p class="subtitle">Subí tu foto y la IA analiza tu cabello y te recomienda los mejores estilos.</p>
+
+      <div class="install-banner" id="install-banner">
+        <p>📱 Instalá la app en tu celular para usarla sin internet.</p>
+        <button onclick="installPWA()">Instalar</button>
+      </div>
+
+      <label class="photo-zone" id="photo-zone" for="file-input">
+        <input type="file" id="file-input" accept="image/*" capture="user">
+        <img id="preview-img" src="" alt="">
+        <div id="photo-placeholder">
+          <span class="photo-icon">📷</span>
+          <div class="photo-cta">Tomá o subí tu foto</div>
+          <div class="photo-hint">La IA analiza tu rostro y cabello</div>
+        </div>
+      </label>
+      <div class="photo-actions" id="photo-actions">
+        <button class="btn btn-ghost" onclick="resetPhoto()">Cambiar foto</button>
+      </div>
+
+      <!-- AI BOX -->
+      <div class="ai-box" id="ai-box">
+        <div class="ai-box-title">🤖 Análisis IA</div>
+        <div class="ai-loading" id="ai-loading">
+          <div class="ai-spinner"></div>
+          <span>Analizando tu foto...</span>
+        </div>
+        <div class="ai-result" id="ai-result" style="display:none;"></div>
+      </div>
+
+      <button class="btn btn-ai" id="btn-analyze" onclick="analyzePhoto()" style="display:none;margin-top:14px;">
+        🤖 Analizar con IA
+      </button>
+
+      <hr class="divider">
+      <p style="font-size:12px;color:var(--muted);text-align:center;">Sin foto también podés continuar.</p>
+    </div>
+
+    <!-- S2: PERFIL -->
+    <div class="screen" id="screen-2">
+      <div class="screen-label">Paso 2</div>
+      <h2>¿Quién se sienta<br>en la silla?</h2>
+      <p class="subtitle">Elegí tu perfil para ver los estilos adecuados.</p>
+      <div class="profile-grid">
+        <div class="profile-card" onclick="selectProfile(this,'Adolescente')"><span class="profile-emoji">🧑</span><div class="profile-name">Adolescente</div><div class="profile-age">12–17 años</div></div>
+        <div class="profile-card" onclick="selectProfile(this,'Adulto')"><span class="profile-emoji">👨</span><div class="profile-name">Adulto</div><div class="profile-age">18–45 años</div></div>
+        <div class="profile-card" onclick="selectProfile(this,'Mayor')"><span class="profile-emoji">👴</span><div class="profile-name">Mayor</div><div class="profile-age">46+ años</div></div>
+      </div>
+    </div>
+
+    <!-- S3: ESTILOS -->
+    <div class="screen" id="screen-3">
+      <div class="screen-label">Paso 3</div>
+      <h2>Diseñá<br>tu look</h2>
+      <p class="subtitle">Elegí corte, barba y tintura. <span id="ai-hint" style="color:var(--accent1);display:none;">⭐ = recomendado por IA</span></p>
+
+      <!-- TENDENCIAS BOX -->
+      <div class="tendencias-box" id="tendencias-box">
+        <div class="tendencias-header">
+          <div class="tendencias-title">🔥 Tendencias del momento</div>
+          <div class="tendencias-season" id="tendencias-season"></div>
+        </div>
+        <div class="tendencias-loading" id="tendencias-loading">
+          <div class="ai-spinner"></div>
+          <span>Analizando tendencias...</span>
+        </div>
+        <div id="tendencias-list" style="display:none;"></div>
+      </div>
+
+      <div class="tab-nav">
+        <button class="tab-btn active" onclick="switchTab('cortes',this)">✂️ Corte</button>
+        <button class="tab-btn" onclick="switchTab('barba',this)">🧔 Barba</button>
+        <button class="tab-btn" onclick="switchTab('tinturas',this)">🎨 Tintura</button>
+      </div>
+      <div id="tab-cortes" class="style-grid"></div>
+      <div id="tab-barba" class="style-grid" style="display:none;"></div>
+      <div id="tab-tinturas" class="color-grid" style="display:none;"></div>
+    </div>
+
+    <!-- S4: GALERÍA + PRODUCTOS -->
+    <div class="screen" id="screen-4">
+      <div class="screen-label">Paso 4</div>
+      <h2>Trabajos &amp;<br>Productos</h2>
+      <div class="tab-nav">
+        <button class="tab-btn active" onclick="switchTab4('galeria',this)">🖼️ Galería</button>
+        <button class="tab-btn" onclick="switchTab4('productos',this)">🧴 Productos</button>
+      </div>
+      <div id="tab4-galeria">
+        <p class="subtitle" style="margin-top:4px;">Trabajos recientes del barbero.</p>
+        <div class="gallery-grid" id="gallery-client"></div>
+      </div>
+      <div id="tab4-productos" style="display:none;">
+        <p class="subtitle" style="margin-top:4px;">Agregá tratamientos o productos.</p>
+        <div class="product-grid" id="products-grid"></div>
+      </div>
+    </div>
+
+    <!-- S5: TURNO -->
+    <div class="screen" id="screen-5">
+      <div class="screen-label">Paso 5</div>
+      <h2>Elegí tu<br>turno</h2>
+      <p class="subtitle">Seleccioná el día y la hora que te queda mejor.</p>
+      <div class="calendar-nav">
+        <button class="cal-arrow" onclick="calPrev()">‹</button>
+        <div class="cal-month" id="cal-month"></div>
+        <button class="cal-arrow" onclick="calNext()">›</button>
+      </div>
+      <div class="calendar-grid" id="calendar-grid"></div>
+      <div id="slots-section" style="display:none;">
+        <div class="slots-title">Horarios disponibles</div>
+        <div class="slots-grid" id="slots-grid"></div>
+      </div>
+      <p style="font-size:12px;color:var(--muted);text-align:center;">Podés saltar si preferís coordinar por WhatsApp.</p>
+    </div>
+
+    <!-- S6: RESUMEN -->
+    <div class="screen" id="screen-6">
+      <div class="screen-label">Paso 6</div>
+      <h2>Tu pedido<br>está listo</h2>
+      <p class="subtitle">Revisá y enviáselo al barbero.</p>
+      <img id="summary-photo" src="" class="summary-photo" alt="">
+      <div class="confirm-box" id="confirm-box">
+        <strong style="color:var(--accent1);font-size:13px;" id="confirm-title">✅ Turno confirmado</strong>
+        <p id="confirm-msg" style="font-size:13px;margin-top:4px;"></p>
+      </div>
+      <div class="summary-block">
+        <div class="summary-row"><span class="summary-label">Perfil</span><span class="summary-value" id="s-perfil"><span class="empty-val">—</span></span></div>
+        <div class="summary-row"><span class="summary-label">Corte</span><span class="summary-value" id="s-corte"><span class="empty-val">Sin elegir</span></span></div>
+        <div class="summary-row"><span class="summary-label">Barba</span><span class="summary-value" id="s-barba"><span class="empty-val">Sin elegir</span></span></div>
+        <div class="summary-row"><span class="summary-label">Tintura</span><span class="summary-value" id="s-tintura"><span class="empty-val">Sin elegir</span></span></div>
+        <div class="summary-row" id="s-prods-row" style="display:none;"><span class="summary-label">Productos</span><span class="summary-value" id="s-prods"></span></div>
+        <div class="summary-row" id="s-turno-row" style="display:none;"><span class="summary-label">Turno</span><span class="summary-value" id="s-turno"></span></div>
+      </div>
+      <div class="total-row" id="total-row" style="display:none;">
+        <span class="total-label">Total estimado</span>
+        <span class="total-val" id="total-val">$ 0</span>
+      </div>
+      <button class="whatsapp-btn" onclick="sendWhatsApp()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.136.558 4.136 1.532 5.875L.057 23.925l6.188-1.625A11.938 11.938 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.9 0-3.676-.492-5.215-1.354l-.375-.222-3.872 1.015 1.033-3.77-.244-.387A9.937 9.937 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+        Enviar al Barbero
+      </button>
+      <div style="margin-top:18px;">
+        <hr class="divider">
+        <div class="screen-label" style="margin-bottom:8px;">¿Ya fuiste? Dejá tu reseña</div>
+        <div class="stars-row" id="stars-row">
+          <span class="star" onclick="setStar(1)">⭐</span>
+          <span class="star" onclick="setStar(2)">⭐</span>
+          <span class="star" onclick="setStar(3)">⭐</span>
+          <span class="star" onclick="setStar(4)">⭐</span>
+          <span class="star" onclick="setStar(5)">⭐</span>
+        </div>
+        <textarea class="field-input" id="review-text" placeholder="Contá tu experiencia..." style="resize:vertical;min-height:65px;margin-bottom:9px;"></textarea>
+        <button class="btn btn-ghost" onclick="submitReview()">Enviar reseña</button>
+      </div>
+      <button class="btn btn-ghost" style="margin-top:9px;" onclick="resetAll()">Empezar de nuevo</button>
+    </div>
+  </main>
+
+  <div class="footer-nav" id="footer-nav">
+    <button class="btn btn-ghost" id="btn-back" onclick="goBack()" style="display:none;">← Atrás</button>
+    <button class="btn btn-gold" id="btn-next" onclick="goNext()">Continuar →</button>
+  </div>
+</div>
+
+<!-- ════ ADMIN ════ -->
+<div id="view-admin">
+  <div class="admin-header">
+    <div>
+      <div class="admin-title">Panel <span>Admin</span></div>
+      <div style="font-size:10px;color:var(--accent1);margin-top:1px;font-family:'DM Mono',monospace;letter-spacing:.1em;">VERSIÓN PRO</div>
+    </div>
+    <div style="display:flex;gap:6px;">
+      <button class="btn btn-green btn-sm" onclick="saveConfig()">💾 Guardar</button>
+      <button class="btn btn-ghost btn-sm" onclick="showView('app')">Ver App →</button>
+    </div>
+  </div>
+
+  <div class="admin-tabs">
+    <button class="admin-tab active" onclick="switchAdminTab('general',this)">🏪 General</button>
+    <button class="admin-tab" onclick="switchAdminTab('catalogo',this)">✂️ Catálogo</button>
+    <button class="admin-tab" onclick="switchAdminTab('agenda',this)">📅 Agenda</button>
+    <button class="admin-tab" onclick="switchAdminTab('galeria',this)">🖼️ Galería</button>
+    <button class="admin-tab" onclick="switchAdminTab('diseno',this)">🎨 Diseño</button>
+    <button class="admin-tab" onclick="switchAdminTab('stats',this)">📊 Stats</button>
+  </div>
+
+  <div class="admin-body">
+
+    <!-- GENERAL -->
+    <div class="admin-panel active" id="apanel-general">
+      <div class="admin-section">
+        <div class="admin-section-title">🏪 Datos de la Barbería</div>
+        <div class="form-row">
+          <div class="field-group"><label class="field-label">Nombre</label><input class="field-input" id="cfg-nombre" placeholder="Barbería El Rey"></div>
+          <div class="field-group"><label class="field-label">Eslogan</label><input class="field-input" id="cfg-eslogan" placeholder="Tu estilo, tu identidad"></div>
+        </div>
+        <div class="form-row">
+          <div class="field-group"><label class="field-label">WhatsApp</label><input class="field-input" id="cfg-whatsapp" placeholder="59899123456"></div>
+          <div class="field-group"><label class="field-label">Duración del turno</label>
+            <select class="field-input" id="cfg-duracion">
+              <option value="30">30 minutos</option>
+              <option value="45">45 minutos</option>
+              <option value="60">1 hora</option>
+            </select>
+          </div>
+        </div>
+        <div class="field-group"><label class="field-label">Mensaje de confirmación</label><textarea class="field-input" id="cfg-confirmacion" placeholder="¡Gracias! Te esperamos..."></textarea></div>
+        <div class="field-group"><label class="field-label">Nueva contraseña admin</label><input class="field-input" id="cfg-password" type="password" placeholder="••••••"></div>
+      </div>
+      <div class="admin-section">
+        <div class="admin-section-title">🤖 Inteligencia Artificial</div>
+        <div class="field-group">
+          <label class="field-label">Motor de IA</label>
+          <select class="field-input" id="cfg-ia-motor" onchange="toggleIAfields()">
+            <option value="claude">Claude (Anthropic)</option>
+            <option value="gemini">Gemini (Google)</option>
+          </select>
+        </div>
+        <div id="ia-claude-fields">
+          <p style="font-size:12px;color:var(--muted);margin-bottom:8px;">Obtenela en <strong>console.anthropic.com</strong></p>
+          <div class="field-group"><label class="field-label">API Key Anthropic</label><input class="field-input" id="cfg-apikey" type="password" placeholder="sk-ant-..."></div>
+        </div>
+        <div id="ia-gemini-fields" style="display:none;">
+          <p style="font-size:12px;color:var(--muted);margin-bottom:8px;">Obtenela en <strong>aistudio.google.com</strong> — tiene capa gratuita.</p>
+          <div class="field-group"><label class="field-label">API Key Gemini</label><input class="field-input" id="cfg-geminikey" type="password" placeholder="AIza..."></div>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="testApiKey()">Probar conexión</button>
+      </div>
+
+      <div class="admin-section">
+        <div class="admin-section-title">📄 Conocimiento de la Barbería</div>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Pegá acá información sobre tu barbería: especialidades, técnicas, productos, estilo. La IA la usa para dar mejores recomendaciones.</p>
+        <textarea class="field-input" id="cfg-conocimiento" placeholder="Ej: Somos especialistas en fades y cortes modernos. Trabajamos con productos Wahl y Schwarzkopf. Nuestro fuerte son los cortes para cabello rizado y afro. Recomendamos siempre el tratamiento hidratante para clientes con cabello seco..." style="min-height:120px;"></textarea>
+      </div>
+
+      <div class="admin-section">
+        <div class="admin-section-title">📸 Firebase (Foto del Cliente)</div>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Conectá tu Firebase para que la foto del cliente llegue al barbero. Creá un proyecto gratis en <strong>firebase.google.com</strong></p>
+        <div class="form-row">
+          <div class="field-group" style="margin:0;"><label class="field-label">API Key Firebase</label><input class="field-input" id="cfg-fb-apikey" placeholder="AIza..."></div>
+          <div class="field-group" style="margin:0;"><label class="field-label">Project ID</label><input class="field-input" id="cfg-fb-projectid" placeholder="mi-barberia-12345"></div>
+        </div>
+        <div class="field-group" style="margin-top:10px;"><label class="field-label">Storage Bucket</label><input class="field-input" id="cfg-fb-bucket" placeholder="mi-barberia-12345.appspot.com"></div>
+        <button class="btn btn-ghost btn-sm" style="margin-top:10px;" onclick="testFirebase()">Probar Firebase</button>
+        <p style="font-size:11px;color:var(--muted);margin-top:8px;">⚠️ Sin Firebase configurado la foto no llega al barbero — el resto de la app funciona igual.</p>
+      </div>
+    </div>
+
+    <!-- CATÁLOGO -->
+    <div class="admin-panel" id="apanel-catalogo">
+      <div class="admin-section">
+        <div class="admin-section-title">✂️ Cortes</div>
+        <div class="admin-item-list" id="list-cortes"></div>
+        <button class="btn btn-ghost btn-sm" onclick="toggleForm('form-corte')">+ Agregar corte</button>
+        <div class="add-form" id="form-corte">
+          <div class="form-row-3">
+            <div class="field-group" style="margin:0;"><label class="field-label">Nombre</label><input class="field-input" id="new-corte-nombre" placeholder="Fade Clásico"></div>
+            <div class="field-group" style="margin:0;"><label class="field-label">Descripción</label><input class="field-input" id="new-corte-desc" placeholder="Degradado suave"></div>
+            <div class="field-group" style="margin:0;"><label class="field-label">Precio</label><input class="field-input" id="new-corte-precio" placeholder="350"></div>
+          </div>
+          <div class="form-row" style="margin-top:8px;">
+            <div class="field-group" style="margin:0;"><label class="field-label">Emoji (fallback)</label><input class="field-input" id="new-corte-emoji" placeholder="💈" maxlength="4"></div>
+            <div class="field-group" style="margin:0;"><label class="field-label">Foto (opcional)</label>
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px;font-size:12px;color:var(--muted);">
+                📷 <span id="new-corte-img-name">Subir imagen</span>
+                <input type="file" accept="image/*" style="display:none;" onchange="previewItemImg(this,'new-corte-img-name','new-corte-img-data')">
+              </label>
+              <input type="hidden" id="new-corte-img-data">
+            </div>
+          </div>
+          <button class="btn btn-gold" style="margin-top:9px;" onclick="addItem('cortes')">Agregar</button>
+        </div>
+      </div>
+      <div class="admin-section">
+        <div class="admin-section-title">🧔 Barba</div>
+        <div class="admin-item-list" id="list-barba"></div>
+        <button class="btn btn-ghost btn-sm" onclick="toggleForm('form-barba')">+ Agregar estilo</button>
+        <div class="add-form" id="form-barba">
+          <div class="form-row-3">
+            <div class="field-group" style="margin:0;"><label class="field-label">Nombre</label><input class="field-input" id="new-barba-nombre" placeholder="Barba Completa"></div>
+            <div class="field-group" style="margin:0;"><label class="field-label">Descripción</label><input class="field-input" id="new-barba-desc" placeholder="Definida y prolija"></div>
+            <div class="field-group" style="margin:0;"><label class="field-label">Precio</label><input class="field-input" id="new-barba-precio" placeholder="200"></div>
+          </div>
+          <div class="form-row" style="margin-top:8px;">
+            <div class="field-group" style="margin:0;"><label class="field-label">Emoji (fallback)</label><input class="field-input" id="new-barba-emoji" placeholder="🧔" maxlength="4"></div>
+            <div class="field-group" style="margin:0;"><label class="field-label">Foto (opcional)</label>
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px;font-size:12px;color:var(--muted);">
+                📷 <span id="new-barba-img-name">Subir imagen</span>
+                <input type="file" accept="image/*" style="display:none;" onchange="previewItemImg(this,'new-barba-img-name','new-barba-img-data')">
+              </label>
+              <input type="hidden" id="new-barba-img-data">
+            </div>
+          </div>
+          <button class="btn btn-gold" style="margin-top:9px;" onclick="addItem('barba')">Agregar</button>
+        </div>
+      </div>
+      <div class="admin-section">
+        <div class="admin-section-title">🎨 Tinturas</div>
+        <div class="admin-item-list" id="list-tinturas"></div>
+        <button class="btn btn-ghost btn-sm" onclick="toggleForm('form-tintura')">+ Agregar tintura</button>
+        <div class="add-form" id="form-tintura">
+          <div class="form-row">
+            <div class="field-group" style="margin:0;"><label class="field-label">Nombre</label><input class="field-input" id="new-tintura-nombre" placeholder="Rubio Miel"></div>
+            <div class="field-group" style="margin:0;"><label class="field-label">Precio</label><input class="field-input" id="new-tintura-precio" placeholder="500"></div>
+          </div>
+          <div class="field-group" style="margin-top:8px;"><label class="field-label">Color (hex)</label><input class="field-input" id="new-tintura-color" placeholder="#C9A84C">
+            <div class="swatch-row">
+              <div class="swatch-preset" style="background:#5C3D1E;" onclick="setColor('#5C3D1E')"></div>
+              <div class="swatch-preset" style="background:#0A0A0A;" onclick="setColor('#0A0A0A')"></div>
+              <div class="swatch-preset" style="background:#7B3F00;" onclick="setColor('#7B3F00')"></div>
+              <div class="swatch-preset" style="background:#C9A84C;" onclick="setColor('#C9A84C')"></div>
+              <div class="swatch-preset" style="background:#C04800;" onclick="setColor('#C04800')"></div>
+              <div class="swatch-preset" style="background:#B0B0B0;" onclick="setColor('#B0B0B0')"></div>
+              <div class="swatch-preset" style="background:#2347A0;" onclick="setColor('#2347A0')"></div>
+              <div class="swatch-preset" style="background:#6A0DAD;" onclick="setColor('#6A0DAD')"></div>
+            </div>
+          </div>
+          <button class="btn btn-gold" style="margin-top:9px;" onclick="addItem('tinturas')">Agregar</button>
+        </div>
+      </div>
+      <div class="admin-section">
+        <div class="admin-section-title">🧴 Productos</div>
+        <div class="admin-item-list" id="list-productos"></div>
+        <button class="btn btn-ghost btn-sm" onclick="toggleForm('form-producto')">+ Agregar producto</button>
+        <div class="add-form" id="form-producto">
+          <div class="form-row-3">
+            <div class="field-group" style="margin:0;"><label class="field-label">Nombre</label><input class="field-input" id="new-prod-nombre" placeholder="Aceite de Barba"></div>
+            <div class="field-group" style="margin:0;"><label class="field-label">Descripción</label><input class="field-input" id="new-prod-desc" placeholder="Hidratación y brillo"></div>
+            <div class="field-group" style="margin:0;"><label class="field-label">Precio</label><input class="field-input" id="new-prod-precio" placeholder="650"></div>
+          </div>
+          <div class="form-row" style="margin-top:8px;">
+            <div class="field-group" style="margin:0;"><label class="field-label">Emoji (fallback)</label><input class="field-input" id="new-prod-emoji" placeholder="🧴" maxlength="4"></div>
+            <div class="field-group" style="margin:0;"><label class="field-label">Foto (opcional)</label>
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px;font-size:12px;color:var(--muted);">
+                📷 <span id="new-prod-img-name">Subir imagen</span>
+                <input type="file" accept="image/*" style="display:none;" onchange="previewItemImg(this,'new-prod-img-name','new-prod-img-data')">
+              </label>
+              <input type="hidden" id="new-prod-img-data">
+            </div>
+          </div>
+          <button class="btn btn-gold" style="margin-top:9px;" onclick="addItem('productos')">Agregar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- AGENDA -->
+    <div class="admin-panel" id="apanel-agenda">
+      <div class="admin-section">
+        <div class="admin-section-title">📅 Días y Horarios</div>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:12px;">Activá los días que trabajás y configurá tu horario.</p>
+        <div id="days-config"></div>
+      </div>
+      <div class="admin-section">
+        <div class="admin-section-title">🚫 Fechas Bloqueadas</div>
+        <div class="admin-item-list" id="list-bloqueados"></div>
+        <div class="form-row" style="margin-top:9px;">
+          <div class="field-group" style="margin:0;"><label class="field-label">Fecha</label><input class="field-input" id="new-bloqueo-fecha" type="date"></div>
+          <div class="field-group" style="margin:0;"><label class="field-label">Motivo</label><input class="field-input" id="new-bloqueo-motivo" placeholder="Vacaciones"></div>
+        </div>
+        <button class="btn btn-ghost btn-sm" style="margin-top:9px;" onclick="addBloqueo()">+ Bloquear fecha</button>
+      </div>
+    </div>
+
+    <!-- GALERÍA -->
+    <div class="admin-panel" id="apanel-galeria">
+      <div class="admin-section">
+        <div class="admin-section-title">🖼️ Galería de Trabajos</div>
+        <div class="gallery-admin-grid" id="gallery-admin-grid"></div>
+        <label class="btn btn-ghost" style="cursor:pointer;">
+          📷 Agregar fotos
+          <input type="file" accept="image/*" multiple style="display:none;" onchange="addGalleryPhotos(this)">
+        </label>
+      </div>
+    </div>
+
+    <!-- DISEÑO -->
+    <div class="admin-panel" id="apanel-diseno">
+      <div class="admin-section">
+        <div class="admin-section-title">🏷️ Logo de la Barbería</div>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:12px;">Subí el logo. Se muestra en el header reemplazando el texto.</p>
+        <div id="logo-preview-wrap" style="display:none;margin-bottom:12px;">
+          <img id="logo-preview" style="height:48px;object-fit:contain;border-radius:8px;border:1px solid var(--border);padding:6px;background:var(--card);" alt="Logo">
+        </div>
+        <div style="display:flex;gap:8px;">
+          <label class="btn btn-ghost btn-sm" style="cursor:pointer;">
+            📷 Subir logo
+            <input type="file" accept="image/*" style="display:none;" onchange="uploadLogo(this)">
+          </label>
+          <button class="btn btn-ghost btn-sm" onclick="removeLogo()">✕ Quitar</button>
+        </div>
+      </div>
+      <div class="admin-section">
+        <div class="admin-section-title">🎨 Color Principal de la App</div>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:12px;">Elegí el color de acento que identifica tu barbería.</p>
+        <div class="color-preview" id="color-preview"></div>
+        <div class="theme-swatches">
+          <div class="theme-swatch" style="background:#C9A84C;" onclick="applyTheme('#C9A84C','#E2C47A')" title="Dorado (default)"></div>
+          <div class="theme-swatch" style="background:#E74C3C;" onclick="applyTheme('#E74C3C','#FF6B6B')" title="Rojo"></div>
+          <div class="theme-swatch" style="background:#2ECC71;" onclick="applyTheme('#2ECC71','#55EFC4')" title="Verde"></div>
+          <div class="theme-swatch" style="background:#3498DB;" onclick="applyTheme('#3498DB','#74B9FF')" title="Azul"></div>
+          <div class="theme-swatch" style="background:#9B59B6;" onclick="applyTheme('#9B59B6','#A29BFE')" title="Violeta"></div>
+          <div class="theme-swatch" style="background:#E67E22;" onclick="applyTheme('#E67E22','#FDCB6E')" title="Naranja"></div>
+          <div class="theme-swatch" style="background:#1ABC9C;" onclick="applyTheme('#1ABC9C','#00CEC9')" title="Teal"></div>
+          <div class="theme-swatch" style="background:#F1C40F;" onclick="applyTheme('#F1C40F','#FFEAA7')" title="Amarillo"></div>
+          <div class="theme-swatch" style="background:#E91E63;" onclick="applyTheme('#E91E63','#FF80AB')" title="Rosa"></div>
+        </div>
+        <div class="field-group" style="margin-top:14px;">
+          <label class="field-label">Color personalizado (hex)</label>
+          <div style="display:flex;gap:8px;">
+            <input class="field-input" id="custom-color" placeholder="#C9A84C" style="flex:1;">
+            <button class="btn btn-ghost btn-sm" onclick="applyCustomColor()">Aplicar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="admin-panel" id="apanel-stats">
+      <div class="admin-section">
+        <div class="admin-section-title">📊 Resumen General</div>
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-num" id="stat-pedidos">0</div><div class="stat-label">Pedidos totales</div></div>
+          <div class="stat-card"><div class="stat-num" id="stat-resenas">0</div><div class="stat-label">Reseñas</div></div>
+          <div class="stat-card"><div class="stat-num" id="stat-estrellas">—</div><div class="stat-label">Promedio ⭐</div></div>
+          <div class="stat-card"><div class="stat-num" id="stat-turnos">0</div><div class="stat-label">Turnos agendados</div></div>
+          <div class="stat-card"><div class="stat-num" id="stat-ingresos">$0</div><div class="stat-label">Ingresos estimados</div></div>
+          <div class="stat-card"><div class="stat-num" id="stat-ai">0</div><div class="stat-label">Análisis IA</div></div>
+        </div>
+      </div>
+      <div class="admin-section">
+        <div class="admin-section-title">📋 Historial de Pedidos (últimos 50)</div>
+        <div id="recent-list"></div>
+      </div>
+      <div class="admin-section">
+        <div class="admin-section-title">⭐ Reseñas</div>
+        <div id="reviews-admin-list"></div>
+      </div>
+      <button class="btn btn-red btn-sm" onclick="if(confirm('¿Borrar estadísticas?'))clearStats()">🗑 Limpiar estadísticas</button>
+    </div>
+
+    <!-- DEMO -->
+    <div class="admin-section" style="margin-top:14px;">
+      <div class="admin-section-title">🕐 Modo Demo</div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:12px;">Activá el demo para que tus clientes prueben la app por tiempo limitado. Cuando vence aparece una pantalla de cierre automática.</p>
+      <div class="form-row">
+        <div class="field-group" style="margin:0;">
+          <label class="field-label">Estado</label>
+          <select class="field-input" id="cfg-demo-activo">
+            <option value="0">Demo desactivado</option>
+            <option value="1">Demo activado</option>
+          </select>
+        </div>
+        <div class="field-group" style="margin:0;">
+          <label class="field-label">Duración</label>
+          <select class="field-input" id="cfg-demo-minutos">
+            <option value="30">30 minutos</option>
+            <option value="60">1 hora</option>
+            <option value="120">2 horas</option>
+            <option value="1440">24 horas</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-group" style="margin-top:10px;">
+        <label class="field-label">Mensaje al terminar</label>
+        <textarea class="field-input" id="cfg-demo-msg" placeholder="¡Gracias por probar la app! Consultá con tu barbero." style="min-height:60px;resize:vertical;"></textarea>
+      </div>
+      <button class="btn btn-gold btn-sm" style="margin-top:10px;" onclick="iniciarDemo()">▶ Iniciar demo ahora</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════
+// DEFAULT CONFIG
+// ══════════════════════════════
+const DEFAULT_CFG={
+  nombre:'BarberStyle',eslogan:'Tu Estilo, Tu Identidad',
+  whatsapp:'59899000000',password:'1234',duracion:30,apikey:'',
+  confirmacion:'¡Gracias! Te esperamos. Cualquier cambio avisanos por WhatsApp.',
+  accentColor:'#C9A84C',accentColorLt:'#E2C47A',
+  cortes:[
+    {emoji:'💈',nombre:'Fade Clásico',desc:'Degradado suave, lateral prolijo',precio:'350'},
+    {emoji:'✂️',nombre:'Undercut Moderno',desc:'Sides rapados, top con volumen',precio:'380'},
+    {emoji:'🪮',nombre:'Texturizado',desc:'Capas, natural y descontracturado',precio:'300'},
+    {emoji:'👑',nombre:'Pompadour',desc:'Icónico, volumen hacia atrás',precio:'400'},
+    {emoji:'🏛️',nombre:'Caesar Cut',desc:'Flequillo recto, corto y parejo',precio:'280'},
+    {emoji:'⚡',nombre:'Crew Cut',desc:'Militar, limpio, sin complicaciones',precio:'250'},
+  ],
+  barba:[
+    {emoji:'🧔',nombre:'Barba Completa',desc:'Definida y prolija',precio:'200'},
+    {emoji:'✨',nombre:'Barba Corta',desc:'Efecto 3 días, limpio',precio:'150'},
+    {emoji:'🔒',nombre:'Candado',desc:'Solo bigote y mentón',precio:'180'},
+    {emoji:'🪒',nombre:'Sin Barba',desc:'Afeitado al ras',precio:'120'},
+  ],
+  tinturas:[
+    {nombre:'Natural',color:'#5C3D1E',precio:'500'},
+    {nombre:'Negro',color:'#0A0A0A',precio:'500'},
+    {nombre:'Castaño',color:'#7B3F00',precio:'550'},
+    {nombre:'Rubio Miel',color:'#C9A84C',precio:'600'},
+    {nombre:'Cobrizo',color:'#C04800',precio:'600'},
+    {nombre:'Platinado',color:'#C8C8C8',precio:'700'},
+    {nombre:'Azul',color:'#2347A0',precio:'700'},
+    {nombre:'Sin Tintura',color:'#333',precio:'0'},
+  ],
+  productos:[
+    {emoji:'🧴',nombre:'Aceite de Barba',desc:'Hidratación y brillo',precio:'650'},
+    {emoji:'💊',nombre:'Tratamiento Capilar',desc:'Nutrición profunda',precio:'800'},
+    {emoji:'🪥',nombre:'Cera Modeladora',desc:'Fijación flexible todo el día',precio:'450'},
+    {emoji:'🌿',nombre:'Shampoo Premium',desc:'Sin sulfatos',precio:'550'},
+  ],
+  dias:{
+    0:{activo:false,desde:'09:00',hasta:'18:00',nombre:'Domingo'},
+    1:{activo:true,desde:'09:00',hasta:'19:00',nombre:'Lunes'},
+    2:{activo:true,desde:'09:00',hasta:'19:00',nombre:'Martes'},
+    3:{activo:true,desde:'09:00',hasta:'19:00',nombre:'Miércoles'},
+    4:{activo:true,desde:'09:00',hasta:'19:00',nombre:'Jueves'},
+    5:{activo:true,desde:'09:00',hasta:'20:00',nombre:'Viernes'},
+    6:{activo:true,desde:'09:00',hasta:'15:00',nombre:'Sábado'},
+  },
+  bloqueados:[],galeria:[],
+};
+
+// ══════════════════════════════
+// STATE
+// ══════════════════════════════
+let cfg={};
+let stats={pedidos:[],resenas:[],turnosAgendados:0,analisisIA:0};
+const state={
+  screen:1,total:6,
+  photo:null,photoBase64:null,
+  perfil:null,
+  corte:null,corteP:0,
+  barba:null,barbaP:0,
+  tintura:null,tinturaP:0,
+  productos:[],productosP:[],
+  turnoFecha:null,turnoHora:null,
+  starRating:0,
+  aiRecomendaciones:{cortes:[],barba:[]},
+  aiTendencias:[],
+  aiDone:false,
+  tendenciasDone:false,
+};
+let calYear,calMonth;
+let deferredPrompt=null;
+
+// ── SEASON DETECTION ──
+function getSeason(){
+  const m=new Date().getMonth();
+  // Uruguay/Argentina: hemisferio sur
+  if(m>=11||m<=1) return {nombre:'Verano',emoji:'☀️',adj:'verano'};
+  if(m>=2&&m<=4)  return {nombre:'Otoño', emoji:'🍂',adj:'otoño'};
+  if(m>=5&&m<=7)  return {nombre:'Invierno',emoji:'❄️',adj:'invierno'};
+  return {nombre:'Primavera',emoji:'🌸',adj:'primavera'};
+}
+
+// ══════════════════════════════
+// INIT
+// ══════════════════════════════
+function init(){
+  const sc=localStorage.getItem('bs_pro_cfg');
+  cfg=sc?JSON.parse(sc):JSON.parse(JSON.stringify(DEFAULT_CFG));
+  const ss=localStorage.getItem('bs_pro_stats');
+  stats=ss?JSON.parse(ss):{pedidos:[],resenas:[],turnosAgendados:0,analisisIA:0};
+  const now=new Date();
+  calYear=now.getFullYear();calMonth=now.getMonth();
+  applyThemeCSS(cfg.accentColor||'#C9A84C',cfg.accentColorLt||'#E2C47A');
+  applyBranding();
+  renderApp();
+  renderProgressDots();
+  showView('app');
+  updateProgress();
+  setupPWA();
+}
+
+function applyBranding(){
+  const parts=cfg.nombre.split(' ');
+  document.getElementById('app-logo').innerHTML=
+    parts.length>1?parts.slice(0,-1).join(' ')+'<span> '+parts[parts.length-1]+'</span>':'<span>'+cfg.nombre+'</span>';
+  document.getElementById('app-tagline').textContent=cfg.eslogan;
+}
+
+function applyThemeCSS(c1,c2){
+  document.documentElement.style.setProperty('--accent1',c1);
+  document.documentElement.style.setProperty('--accent2',c2);
+  document.documentElement.style.setProperty('--gold-dim',hexToRgba(c1,0.15));
+  const prev=document.getElementById('color-preview');
+  if(prev)prev.style.background=`linear-gradient(135deg,${c1},${c2})`;
+}
+function hexToRgba(hex,a){
+  const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${a})`;
+}
+
+function renderProgressDots(){
+  const pb=document.getElementById('progress-bar');
+  pb.innerHTML='';
+  for(let i=1;i<=state.total;i++){
+    pb.innerHTML+=`<div class="step-dot" id="dot-${i}"></div>`;
+  }
+}
+
+// ══════════════════════════════
+// VIEWS
+// ══════════════════════════════
+function showView(v){
+  ['app','admin','login'].forEach(x=>document.getElementById('view-'+x).classList.remove('active'));
+  document.getElementById('view-'+v).classList.add('active');
+  if(v==='admin')loadAdminForm();
+}
+function doLogin(){
+  const p=document.getElementById('login-pass').value;
+  if(p===cfg.password){
+    document.getElementById('login-pass').value='';
+    document.getElementById('login-error').style.display='none';
+    showView('admin');
+  } else {
+    document.getElementById('login-error').style.display='block';
+  }
+}
+
+// ══════════════════════════════
+// RENDER APP
+// ══════════════════════════════
+function thumb(item, fallback){
+  return item.img
+    ? `<img src="${item.img}" alt="${esc(item.nombre)}" style="width:100%;height:100%;object-fit:cover;">`
+    : (item.emoji || fallback);
+}
+
+function renderApp(){
+  renderCortes();renderBarba();renderTinturas();renderProductos();renderGalleryClient();
+  applyLogoToHeader();
+}
+function renderCortes(){
+  const trendingNames=state.aiTendencias.filter(t=>t.tipo==='corte').map(t=>t.nombre);
+  document.getElementById('tab-cortes').innerHTML=cfg.cortes.map(c=>{
+    const isRec=state.aiRecomendaciones.cortes.includes(c.nombre);
+    const isTrend=trendingNames.includes(c.nombre);
+    return `<div class="style-card${isRec?' ai-recommended':''}${isTrend?' trending':''}" onclick="selectStyle(this,'corte','${esc(c.nombre)}',${parseInt(c.precio)||0})">
+      <div class="style-thumb">${thumb(c,'✂️')}</div>
+      <div class="style-info">
+        <div class="style-name">${esc(c.nombre)}</div>
+        <div class="style-desc">${esc(c.desc)}</div>
+        ${c.precio&&c.precio!='0'?`<div class="style-price">$ ${c.precio}</div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+function renderBarba(){
+  const trendingNames=state.aiTendencias.filter(t=>t.tipo==='barba').map(t=>t.nombre);
+  document.getElementById('tab-barba').innerHTML=cfg.barba.map(b=>{
+    const isRec=state.aiRecomendaciones.barba.includes(b.nombre);
+    const isTrend=trendingNames.includes(b.nombre);
+    return `<div class="style-card${isRec?' ai-recommended':''}${isTrend?' trending':''}" onclick="selectStyle(this,'barba','${esc(b.nombre)}',${parseInt(b.precio)||0})">
+      <div class="style-thumb">${thumb(b,'🧔')}</div>
+      <div class="style-info">
+        <div class="style-name">${esc(b.nombre)}</div>
+        <div class="style-desc">${esc(b.desc)}</div>
+        ${b.precio&&b.precio!='0'?`<div class="style-price">$ ${b.precio}</div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+function renderTinturas(){
+  document.getElementById('tab-tinturas').innerHTML=cfg.tinturas.map(t=>`
+    <div class="color-card" onclick="selectStyle(this,'tintura','${esc(t.nombre)}',${parseInt(t.precio)||0})">
+      <div class="color-swatch" style="background:${t.color};"></div>
+      <div class="color-name">${esc(t.nombre)}${t.precio&&t.precio!='0'?'<br><span style="color:var(--accent1);font-size:10px;">$'+t.precio+'</span>':''}</div>
+    </div>`).join('');
+}
+function renderProductos(){
+  document.getElementById('products-grid').innerHTML=cfg.productos.map(p=>`
+    <div class="product-card" onclick="toggleProduct(this,'${esc(p.nombre)}',${parseInt(p.precio)||0})">
+      <div class="product-thumb">${thumb(p,'🧴')}</div>
+      <div class="product-info">
+        <div class="product-name">${esc(p.nombre)}</div>
+        <div class="product-desc">${esc(p.desc)}</div>
+        ${p.precio&&p.precio!='0'?`<div class="product-price">$ ${p.precio}</div>`:''}
+      </div>
+    </div>`).join('');
+}
+function renderGalleryClient(){
+  const g=document.getElementById('gallery-client');
+  if(!cfg.galeria||!cfg.galeria.length){
+    g.innerHTML='<div class="gallery-empty">📷 El barbero aún no subió fotos.</div>';return;
+  }
+  g.innerHTML=cfg.galeria.map(src=>`<div class="gallery-item"><img src="${src}" alt="trabajo"></div>`).join('');
+}
+function applyLogoToHeader(){
+  const logoEl=document.getElementById('app-logo');
+  if(cfg.logoImg){
+    logoEl.innerHTML=`<img src="${cfg.logoImg}" style="height:38px;object-fit:contain;" alt="${esc(cfg.nombre)}">`;
+  } else {
+    const parts=cfg.nombre.split(' ');
+    logoEl.innerHTML=parts.length>1?parts.slice(0,-1).join(' ')+'<span> '+parts[parts.length-1]+'</span>':'<span>'+cfg.nombre+'</span>';
+  }
+}
+function esc(s){return String(s||'').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// ══════════════════════════════
+// PHOTO
+// ══════════════════════════════
+document.getElementById('file-input').addEventListener('change',function(e){
+  const file=e.target.files[0];if(!file)return;
+  const r=new FileReader();
+  r.onload=function(ev){
+    state.photo=ev.target.result;
+    state.photoBase64=ev.target.result.split(',')[1];
+    document.getElementById('preview-img').src=ev.target.result;
+    document.getElementById('preview-img').style.display='block';
+    document.getElementById('photo-placeholder').style.display='none';
+    document.getElementById('photo-zone').classList.add('has-photo');
+    document.getElementById('photo-actions').style.display='flex';
+    document.getElementById('btn-analyze').style.display='flex';
+    state.aiDone=false;
+    document.getElementById('ai-box').classList.remove('show');
+  };
+  r.readAsDataURL(file);
+});
+function resetPhoto(){
+  state.photo=null;state.photoBase64=null;state.aiDone=false;
+  state.aiRecomendaciones={cortes:[],barba:[]};
+  document.getElementById('preview-img').style.display='none';
+  document.getElementById('photo-placeholder').style.display='block';
+  document.getElementById('photo-zone').classList.remove('has-photo');
+  document.getElementById('photo-actions').style.display='none';
+  document.getElementById('btn-analyze').style.display='none';
+  document.getElementById('ai-box').classList.remove('show');
+  document.getElementById('file-input').value='';
+  document.getElementById('ai-hint').style.display='none';
+}
+
+// ══════════════════════════════
+// CLAUDE API — ANÁLISIS DE FOTO
+// ══════════════════════════════
+async function analyzePhoto(){
+  if(!state.photoBase64){toast('Primero subí una foto');return;}
+  if(!cfg.apikey){toast('Configurá la API Key en Admin → General');return;}
+  const box=document.getElementById('ai-box');
+  const loading=document.getElementById('ai-loading');
+  const result=document.getElementById('ai-result');
+  box.classList.add('show');
+  loading.style.display='flex';
+  result.style.display='none';
+  document.getElementById('btn-analyze').disabled=true;
+
+  const cortesDisponibles=cfg.cortes.map(c=>c.nombre).join(', ');
+  const barbaDisponibles=cfg.barba.map(b=>b.nombre).join(', ');
+
+  const prompt=`Analizá esta foto de una persona que quiere ir a la barbería.
+
+Cortes disponibles en la barbería: ${cortesDisponibles}
+Estilos de barba disponibles: ${barbaDisponibles}
+
+Respondé SOLO en este formato JSON exacto, sin texto adicional:
+{
+  "forma_rostro": "ovalado|cuadrado|redondo|alargado|triangular",
+  "tipo_cabello": "liso|ondulado|rizado|grueso|fino",
+  "descripcion": "2 oraciones sobre el cabello y rostro actuales",
+  "cortes_recomendados": ["nombre exacto del corte 1", "nombre exacto del corte 2", "nombre exacto del corte 3"],
+  "barba_recomendada": ["nombre exacto del estilo 1", "nombre exacto del estilo 2"],
+  "consejo_barbero": "1 consejo corto y concreto para el barbero"
+}
+
+Usá solo nombres que existan en las listas proporcionadas.
+${cfg.conocimiento?`\nInformación adicional de esta barbería: ${cfg.conocimiento}`:''}`;
+
+  try{
+    let aiText='';
+    if(cfg.iaMotor==='gemini'){
+      // ── GEMINI ──
+      if(!cfg.geminikey){throw new Error('Configurá la API Key de Gemini en Admin → General');}
+      const gRes=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${cfg.geminikey}`,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({contents:[{parts:[
+          {inline_data:{mime_type:'image/jpeg',data:state.photoBase64}},
+          {text:prompt}
+        ]}]})
+      });
+      const gData=await gRes.json();
+      if(gData.error)throw new Error(gData.error.message);
+      aiText=gData.candidates[0].content.parts[0].text;
+    } else {
+      // ── CLAUDE ──
+      if(!cfg.apikey){throw new Error('Configurá la API Key de Anthropic en Admin → General');}
+      const cRes=await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','x-api-key':cfg.apikey,'anthropic-version':'2023-06-01'},
+        body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:800,messages:[{role:'user',content:[
+          {type:'image',source:{type:'base64',media_type:'image/jpeg',data:state.photoBase64}},
+          {type:'text',text:prompt}
+        ]}]})
+      });
+      const cData=await cRes.json();
+      if(cData.error)throw new Error(cData.error.message);
+      aiText=cData.content[0].text;
+    }
+    const ai=JSON.parse(aiText.replace(/```json|```/g,'').trim());
+    state.aiRecomendaciones.cortes=ai.cortes_recomendados||[];
+    state.aiRecomendaciones.barba=ai.barba_recomendada||[];
+    state.aiRecomendaciones.formaRostro=ai.forma_rostro||'';
+    state.aiDone=true;
+    stats.analisisIA=(stats.analisisIA||0)+1;
+    saveStats();
+    renderCortes();renderBarba();
+    document.getElementById('ai-hint').style.display='inline';
+    loading.style.display='none';
+    result.style.display='block';
+    result.innerHTML=`
+      <div style="margin-bottom:10px;">
+        <span class="ai-tag">Rostro: ${ai.forma_rostro}</span>
+        <span class="ai-tag">Cabello: ${ai.tipo_cabello}</span>
+        <span class="ai-tag">${cfg.iaMotor==='gemini'?'⚡ Gemini':'🤖 Claude'}</span>
+      </div>
+      <p style="margin-bottom:10px;">${ai.descripcion}</p>
+      <div style="margin-bottom:8px;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.1em;">Cortes recomendados</div>
+        ${ai.cortes_recomendados.map(c=>`<span class="ai-tag">✂️ ${c}</span>`).join('')}
+      </div>
+      <div style="margin-bottom:8px;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.1em;">Barba recomendada</div>
+        ${ai.barba_recomendada.map(b=>`<span class="ai-tag">🧔 ${b}</span>`).join('')}
+      </div>
+      <div style="font-size:12px;color:var(--muted);border-top:1px solid var(--border);margin-top:10px;padding-top:10px;">
+        💡 <em>${ai.consejo_barbero}</em>
+      </div>`;
+    document.getElementById('btn-analyze').textContent='🔄 Analizar de nuevo';
+    // Subir foto a Firebase si está configurado
+    if(state.photoBase64 && cfg.fbApiKey && cfg.fbProjectId && cfg.fbBucket){
+      uploadPhotoFirebase();
+    }
+  } catch(err){
+    loading.style.display='none';
+    result.style.display='block';
+    result.innerHTML=`<p style="color:var(--red);">Error: ${err.message}</p><p style="font-size:12px;color:var(--muted);margin-top:6px;">Verificá la configuración en Admin → General.</p>`;
+  }
+  document.getElementById('btn-analyze').disabled=false;
+}
+
+async function uploadPhotoFirebase(){
+  try{
+    const ts=Date.now();
+    const fileName=`fotos/${ts}.jpg`;
+    const uploadUrl=`https://firebasestorage.googleapis.com/v0/b/${cfg.fbBucket}/o?uploadType=media&name=${encodeURIComponent(fileName)}`;
+    const blob=await fetch(`data:image/jpeg;base64,${state.photoBase64}`).then(r=>r.blob());
+    const upRes=await fetch(uploadUrl,{
+      method:'POST',
+      headers:{'Content-Type':'image/jpeg','Authorization':`key=${cfg.fbApiKey}`},
+      body:blob
+    });
+    if(upRes.ok){
+      const photoURL=`https://firebasestorage.googleapis.com/v0/b/${cfg.fbBucket}/o/${encodeURIComponent(fileName)}?alt=media`;
+      state.firebasePhotoURL=photoURL;
+      toast('📸 Foto subida al barbero');
+    }
+  } catch(e){
+    console.log('Firebase upload error:',e.message);
+  }
+}
+
+async function testFirebase(){
+  const fbKey=document.getElementById('cfg-fb-apikey').value.trim();
+  const fbProject=document.getElementById('cfg-fb-projectid').value.trim();
+  if(!fbKey||!fbProject){toast('Completá API Key y Project ID');return;}
+  toast('Verificando Firebase...');
+  try{
+    const r=await fetch(`https://firestore.googleapis.com/v1/projects/${fbProject}/databases/(default)/documents?key=${fbKey}`);
+    if(r.status===200||r.status===401||r.status===403){toast('✅ Firebase conectado');}
+    else throw new Error('Proyecto no encontrado');
+  } catch(e){toast('❌ Error: '+e.message);}
+}
+
+async function testApiKey(){
+  const motor=document.getElementById('cfg-ia-motor')?.value||'claude';
+  if(motor==='gemini'){
+    const key=document.getElementById('cfg-geminikey').value.trim();
+    if(!key){toast('Ingresá la API Key de Gemini');return;}
+    toast('Probando Gemini...');
+    try{
+      const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`,{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({contents:[{parts:[{text:'ok'}]}]})
+      });
+      const d=await r.json();
+      if(d.error)throw new Error(d.error.message);
+      toast('✅ Gemini conectado');
+    } catch(e){toast('❌ Error: '+e.message);}
+  } else {
+    const key=document.getElementById('cfg-apikey').value.trim();
+    if(!key){toast('Ingresá la API Key de Anthropic');return;}
+    toast('Probando Claude...');
+    try{
+      const r=await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01'},
+        body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:10,messages:[{role:'user',content:'ok'}]})
+      });
+      const d=await r.json();
+      if(d.error)throw new Error(d.error.message);
+      toast('✅ Claude conectado');
+    } catch(e){toast('❌ Error: '+e.message);}
+  }
+}
+
+function toggleIAfields(){
+  const motor=document.getElementById('cfg-ia-motor').value;
+  document.getElementById('ia-claude-fields').style.display=motor==='claude'?'block':'none';
+  document.getElementById('ia-gemini-fields').style.display=motor==='gemini'?'block':'none';
+}
+
+// ══════════════════════════════
+// SELECTIONS
+// ══════════════════════════════
+function selectProfile(el,name){
+  document.querySelectorAll('.profile-card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');state.perfil=name;
+}
+function switchTab(tab,btn){
+  ['cortes','barba','tinturas'].forEach(t=>document.getElementById('tab-'+t).style.display='none');
+  document.getElementById('tab-'+tab).style.display='grid';
+  document.querySelectorAll('#screen-3 .tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+function switchTab4(tab,btn){
+  document.getElementById('tab4-galeria').style.display=tab==='galeria'?'block':'none';
+  document.getElementById('tab4-productos').style.display=tab==='productos'?'block':'none';
+  document.querySelectorAll('#screen-4 .tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+function selectStyle(el,type,name,precio){
+  const container=el.closest('.style-grid,.color-grid');
+  container.querySelectorAll('.style-card,.color-card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  state[type]=name;state[type+'P']=precio||0;
+}
+function toggleProduct(el,name,precio){
+  el.classList.toggle('selected');
+  if(el.classList.contains('selected')){
+    if(!state.productos.includes(name)){state.productos.push(name);state.productosP.push(precio||0);}
+  } else {
+    const i=state.productos.indexOf(name);
+    if(i>-1){state.productos.splice(i,1);state.productosP.splice(i,1);}
+  }
+}
+
+// ══════════════════════════════
+// CALENDAR
+// ══════════════════════════════
+const MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const DIAS_S=['Do','Lu','Ma','Mi','Ju','Vi','Sa'];
+function renderCalendar(){
+  document.getElementById('cal-month').textContent=MESES[calMonth]+' '+calYear;
+  const grid=document.getElementById('calendar-grid');
+  grid.innerHTML=DIAS_S.map(d=>`<div class="cal-dow">${d}</div>`).join('');
+  const first=new Date(calYear,calMonth,1).getDay();
+  const days=new Date(calYear,calMonth+1,0).getDate();
+  const today=new Date();today.setHours(0,0,0,0);
+  for(let i=0;i<first;i++)grid.innerHTML+=`<div class="cal-day empty"></div>`;
+  for(let d=1;d<=days;d++){
+    const date=new Date(calYear,calMonth,d);
+    const dow=date.getDay();
+    const ds=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isPast=date<today;
+    const isBlocked=(cfg.bloqueados||[]).some(b=>b.fecha===ds);
+    const dc=cfg.dias[dow];
+    const isAvail=dc&&dc.activo&&!isPast&&!isBlocked;
+    const isSel=state.turnoFecha===ds;
+    const isToday=date.getTime()===today.getTime();
+    let cls='cal-day';
+    if(isPast||isBlocked||!dc?.activo)cls+=' past';
+    else cls+=' available';
+    if(isSel)cls+=' selected';
+    if(isToday)cls+=' today';
+    grid.innerHTML+=`<div class="${cls}" onclick="${isAvail?`selectDay('${ds}',${dow})`:''}"">${d}</div>`;
+  }
+}
+function calPrev(){calMonth--;if(calMonth<0){calMonth=11;calYear--;}renderCalendar();resetTurno();}
+function calNext(){calMonth++;if(calMonth>11){calMonth=0;calYear++;}renderCalendar();resetTurno();}
+function resetTurno(){state.turnoFecha=null;state.turnoHora=null;document.getElementById('slots-section').style.display='none';}
+function selectDay(ds,dow){
+  state.turnoFecha=ds;state.turnoHora=null;
+  renderCalendar();renderSlots(dow,ds);
+  document.getElementById('slots-section').style.display='block';
+}
+function renderSlots(dow,ds){
+  const dc=cfg.dias[dow];
+  if(!dc||!dc.activo){document.getElementById('slots-grid').innerHTML='<div class="no-slots">Sin horarios para este día.</div>';return;}
+  const dur=parseInt(cfg.duracion)||30;
+  const slots=[];
+  let[h,m]=dc.desde.split(':').map(Number);
+  const[eh,em]=dc.hasta.split(':').map(Number);
+  while(h*60+m+dur<=eh*60+em){
+    slots.push(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`);
+    m+=dur;if(m>=60){h+=Math.floor(m/60);m=m%60;}
+  }
+  const taken=(stats.pedidos||[]).filter(p=>p.fecha===ds).map(p=>p.hora);
+  document.getElementById('slots-grid').innerHTML=slots.map(s=>{
+    const iT=taken.includes(s);const iS=state.turnoHora===s;
+    return `<div class="slot${iT?' taken':iS?' selected':''}" onclick="${iT?'':'`selectSlot(\''+s+'\')\''}"">${s}</div>`;
+  }).join('');
+}
+function selectSlot(hora){
+  state.turnoHora=hora;
+  document.querySelectorAll('.slot').forEach(s=>s.classList.remove('selected'));
+  event.target.classList.add('selected');
+}
+
+// ══════════════════════════════
+// NAVIGATION
+// ══════════════════════════════
+function updateProgress(){
+  const s=state.screen;
+  document.getElementById('header-step').textContent=`Paso ${s} de ${state.total}`;
+  for(let i=1;i<=state.total;i++){
+    const d=document.getElementById('dot-'+i);
+    if(!d)continue;
+    d.className='step-dot';
+    if(i<s)d.classList.add('done');
+    if(i===s)d.classList.add('active');
+  }
+  document.getElementById('btn-back').style.display=s>1?'flex':'none';
+  const fn=document.getElementById('footer-nav');
+  const nb=document.getElementById('btn-next');
+  if(s===state.total){fn.style.display='none';}
+  else{fn.style.display='flex';nb.textContent=s===state.total-1?'Ver mi pedido →':'Continuar →';}
+}
+function showScreen(n){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+n).classList.add('active');
+  state.screen=n;updateProgress();
+  if(n===3) checkTendencias();
+  if(n===5)renderCalendar();
+  if(n===state.total)buildSummary();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ── TENDENCIAS ──
+async function checkTendencias(){
+  if(state.tendenciasDone) return;
+  if(!cfg.apikey && !cfg.geminikey) return;
+  const season=getSeason();
+  const box=document.getElementById('tendencias-box');
+  const loading=document.getElementById('tendencias-loading');
+  const list=document.getElementById('tendencias-list');
+  const seasonEl=document.getElementById('tendencias-season');
+  box.classList.add('show');
+  loading.style.display='flex';
+  list.style.display='none';
+  seasonEl.textContent=season.emoji+' '+season.nombre+' '+new Date().getFullYear();
+
+  const cortesDisp=cfg.cortes.map(c=>c.nombre).join(', ');
+  const barbaDisp=cfg.barba.map(b=>b.nombre).join(', ');
+  const perfil=state.perfil||'Adulto';
+  const formaRostro=state.aiRecomendaciones.formaRostro||'';
+
+  const prompt=`Sos un experto en tendencias de barbería y estilismo masculino.
+Temporada actual: ${season.nombre} ${new Date().getFullYear()} (hemisferio sur — Uruguay/Argentina)
+Perfil del cliente: ${perfil}
+${formaRostro?`Forma del rostro: ${formaRostro}`:''}
+${cfg.conocimiento?`Info de la barbería: ${cfg.conocimiento}`:''}
+Cortes disponibles: ${cortesDisp}
+Estilos de barba disponibles: ${barbaDisp}
+
+Analizá las tendencias actuales para ${season.adj} y este perfil.
+Respondé SOLO en este JSON exacto, sin texto adicional:
+{
+  "tendencias": [
+    {
+      "nombre": "nombre exacto del corte de la lista",
+      "descripcion": "por qué está en tendencia esta temporada (1 oración)",
+      "tags": ["tag1", "tag2"],
+      "tipo": "corte"
+    },
+    {
+      "nombre": "nombre exacto de la lista",
+      "descripcion": "descripción de tendencia",
+      "tags": ["tag1"],
+      "tipo": "corte"
+    },
+    {
+      "nombre": "nombre exacto de barba de la lista",
+      "descripcion": "descripción de tendencia",
+      "tags": ["tag1"],
+      "tipo": "barba"
+    }
+  ],
+  "consejo_temporada": "1 consejo de estilo para ${season.adj} corto y concreto"
+}
+Usá solo nombres exactos de las listas. Máximo 3 tendencias.`;
+
+  try{
+    let aiText='';
+    if(cfg.iaMotor==='gemini'&&cfg.geminikey){
+      const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${cfg.geminikey}`,{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})
+      });
+      const d=await r.json();
+      if(d.error)throw new Error(d.error.message);
+      aiText=d.candidates[0].content.parts[0].text;
+    } else if(cfg.apikey){
+      const r=await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','x-api-key':cfg.apikey,'anthropic-version':'2023-06-01'},
+        body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:600,
+          messages:[{role:'user',content:prompt}]})
+      });
+      const d=await r.json();
+      if(d.error)throw new Error(d.error.message);
+      aiText=d.content[0].text;
+    }
+    const ai=JSON.parse(aiText.replace(/```json|```/g,'').trim());
+    state.aiTendencias=ai.tendencias||[];
+    state.tendenciasDone=true;
+    loading.style.display='none';
+    list.style.display='block';
+    list.innerHTML=state.aiTendencias.map((t,i)=>`
+      <div class="tendencia-item">
+        <div class="tendencia-rank">${i+1}</div>
+        <div class="tendencia-info">
+          <div class="tendencia-name">${esc(t.nombre)}</div>
+          <div class="tendencia-desc">${esc(t.descripcion)}</div>
+          <div class="tendencia-tags">
+            <span class="tendencia-tag">${t.tipo==='barba'?'🧔 Barba':'✂️ Corte'}</span>
+            ${(t.tags||[]).map(tg=>`<span class="tendencia-tag">${esc(tg)}</span>`).join('')}
+          </div>
+        </div>
+      </div>`).join('')+
+      (ai.consejo_temporada?`<div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border);font-size:12px;color:var(--muted);">
+        ${season.emoji} <em>${esc(ai.consejo_temporada)}</em></div>`:'');
+    // Mark trending in catalog
+    renderCortes();renderBarba();
+  } catch(e){
+    loading.style.display='none';
+    list.style.display='block';
+    list.innerHTML=`<p style="font-size:12px;color:var(--muted);">No se pudieron cargar las tendencias ahora.</p>`;
+  }
+}
+function goNext(){
+  if(state.screen===2&&!state.perfil){toast('Elegí un perfil para continuar');return;}
+  if(state.screen<state.total)showScreen(state.screen+1);
+}
+function goBack(){if(state.screen>1)showScreen(state.screen-1);}
+
+// ══════════════════════════════
+// SUMMARY
+// ══════════════════════════════
+function buildSummary(){
+  if(state.photo){const sp=document.getElementById('summary-photo');sp.src=state.photo;sp.style.display='block';}
+  document.getElementById('s-perfil').innerHTML=state.perfil||'<span class="empty-val">—</span>';
+  document.getElementById('s-corte').innerHTML=state.corte||'<span class="empty-val">Sin elegir</span>';
+  document.getElementById('s-barba').innerHTML=state.barba||'<span class="empty-val">Sin elegir</span>';
+  document.getElementById('s-tintura').innerHTML=state.tintura||'<span class="empty-val">Sin elegir</span>';
+  if(state.productos.length){
+    document.getElementById('s-prods-row').style.display='flex';
+    document.getElementById('s-prods').textContent=state.productos.join(', ');
+  } else document.getElementById('s-prods-row').style.display='none';
+  if(state.turnoFecha&&state.turnoHora){
+    document.getElementById('s-turno-row').style.display='flex';
+    const fd=new Date(state.turnoFecha+'T12:00:00');
+    document.getElementById('s-turno').textContent=
+      fd.toLocaleDateString('es-UY',{weekday:'long',day:'numeric',month:'long'})+' · '+state.turnoHora+'hs';
+    document.getElementById('confirm-box').classList.add('show');
+    document.getElementById('confirm-title').textContent='✅ Turno confirmado';
+    document.getElementById('confirm-msg').textContent=cfg.confirmacion;
+  } else document.getElementById('s-turno-row').style.display='none';
+  const total=state.corteP+state.barbaP+(state.tintura&&state.tinturaP>0?state.tinturaP:0)+state.productosP.reduce((a,b)=>a+b,0);
+  if(total>0){document.getElementById('total-row').style.display='flex';document.getElementById('total-val').textContent='$ '+total;}
+  else document.getElementById('total-row').style.display='none';
+}
+
+// ══════════════════════════════
+// WHATSAPP
+// ══════════════════════════════
+function sendWhatsApp(){
+  const num=cfg.whatsapp||'59899000000';
+  let msg=`🪒 *Nuevo pedido — ${cfg.nombre}*\n\n`;
+  msg+=`👤 Perfil: ${state.perfil||'—'}\n`;
+  msg+=`✂️ Corte: ${state.corte||'Sin especificar'}\n`;
+  msg+=`🧔 Barba: ${state.barba||'Sin especificar'}\n`;
+  msg+=`🎨 Tintura: ${state.tintura||'Sin especificar'}\n`;
+  if(state.productos.length)msg+=`🧴 Productos: ${state.productos.join(', ')}\n`;
+  if(state.turnoFecha&&state.turnoHora){
+    const fd=new Date(state.turnoFecha+'T12:00:00');
+    msg+=`📅 Turno: ${fd.toLocaleDateString('es-UY',{weekday:'long',day:'numeric',month:'long'})} a las ${state.turnoHora}hs\n`;
+  }
+  if(state.aiDone)msg+=`🤖 Analizado con IA: Sí\n`;
+  const total=state.corteP+state.barbaP+(state.tintura&&state.tinturaP>0?state.tinturaP:0)+state.productosP.reduce((a,b)=>a+b,0);
+  if(total>0)msg+=`💰 Total estimado: $ ${total}\n`;
+  msg+=`\n_Enviado desde BarberStyle Pro_`;
+  const pedido={
+    fecha:state.turnoFecha||new Date().toISOString().split('T')[0],
+    hora:state.turnoHora||'—',
+    perfil:state.perfil,corte:state.corte,barba:state.barba,
+    tintura:state.tintura,productos:state.productos,
+    total:total,aiUsado:state.aiDone,ts:Date.now()
+  };
+  stats.pedidos.unshift(pedido);
+  if(stats.pedidos.length>50)stats.pedidos=stats.pedidos.slice(0,50);
+  if(state.turnoFecha&&state.turnoHora)stats.turnosAgendados=(stats.turnosAgendados||0)+1;
+  saveStats();
+  window.open(`https://wa.me/${num}?text=${encodeURIComponent(msg)}`,'_blank');
+}
+
+// ══════════════════════════════
+// RESEÑAS
+// ══════════════════════════════
+function setStar(n){
+  state.starRating=n;
+  document.querySelectorAll('.star').forEach((s,i)=>s.classList.toggle('active',i<n));
+}
+function submitReview(){
+  if(!state.starRating){toast('Elegí una calificación');return;}
+  stats.resenas=stats.resenas||[];
+  stats.resenas.unshift({estrellas:state.starRating,texto:document.getElementById('review-text').value.trim(),ts:Date.now()});
+  saveStats();toast('✅ ¡Gracias por tu reseña!');
+  document.getElementById('review-text').value='';
+  state.starRating=0;
+  document.querySelectorAll('.star').forEach(s=>s.classList.remove('active'));
+}
+function saveStats(){localStorage.setItem('bs_pro_stats',JSON.stringify(stats));}
+
+// ══════════════════════════════
+// RESET
+// ══════════════════════════════
+function resetAll(){
+  Object.assign(state,{photo:null,photoBase64:null,perfil:null,
+    corte:null,corteP:0,barba:null,barbaP:0,tintura:null,tinturaP:0,
+    productos:[],productosP:[],turnoFecha:null,turnoHora:null,
+    starRating:0,aiRecomendaciones:{cortes:[],barba:[],formaRostro:''},
+    aiTendencias:[],aiDone:false,tendenciasDone:false});
+  resetPhoto();
+  document.querySelectorAll('.profile-card,.style-card,.color-card,.product-card,.slot')
+    .forEach(c=>c.classList.remove('selected'));
+  document.getElementById('summary-photo').style.display='none';
+  document.getElementById('confirm-box').classList.remove('show');
+  document.getElementById('slots-section').style.display='none';
+  document.getElementById('ai-hint').style.display='none';
+  renderCortes();renderBarba();
+  showScreen(1);
+  document.getElementById('footer-nav').style.display='flex';
+}
+
+// ══════════════════════════════
+// ADMIN
+// ══════════════════════════════
+function loadAdminForm(){
+  document.getElementById('cfg-nombre').value=cfg.nombre||'';
+  document.getElementById('cfg-eslogan').value=cfg.eslogan||'';
+  document.getElementById('cfg-whatsapp').value=cfg.whatsapp||'';
+  document.getElementById('cfg-duracion').value=cfg.duracion||30;
+  document.getElementById('cfg-confirmacion').value=cfg.confirmacion||'';
+  document.getElementById('cfg-password').value='';
+  document.getElementById('cfg-apikey').value=cfg.apikey||'';
+  document.getElementById('cfg-geminikey').value=cfg.geminikey||'';
+  document.getElementById('cfg-conocimiento').value=cfg.conocimiento||'';
+  document.getElementById('cfg-fb-apikey').value=cfg.fbApiKey||'';
+  document.getElementById('cfg-fb-projectid').value=cfg.fbProjectId||'';
+  document.getElementById('cfg-fb-bucket').value=cfg.fbBucket||'';
+  const motorSel=document.getElementById('cfg-ia-motor');
+  if(motorSel)motorSel.value=cfg.iaMotor||'claude';
+  toggleIAfields();
+  // Logo preview
+  if(cfg.logoImg){
+    document.getElementById('logo-preview').src=cfg.logoImg;
+    document.getElementById('logo-preview-wrap').style.display='block';
+  }
+  applyThemeCSS(cfg.accentColor||'#C9A84C',cfg.accentColorLt||'#E2C47A');
+  renderAdminList('cortes');renderAdminList('barba');
+  renderAdminList('tinturas');renderAdminList('productos');
+  renderDaysConfig();renderGalleryAdmin();renderBloqueados();
+}
+function switchAdminTab(tab,btn){
+  document.querySelectorAll('.admin-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('apanel-'+tab).classList.add('active');
+  document.querySelectorAll('.admin-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if(tab==='stats')renderStats();
+}
+
+/* THEME */
+function applyTheme(c1,c2){
+  cfg.accentColor=c1;cfg.accentColorLt=c2;
+  applyThemeCSS(c1,c2);
+  document.querySelectorAll('.theme-swatch').forEach(s=>s.classList.remove('active'));
+  event.target.classList.add('active');
+  toast('Color aplicado — guardá para conservarlo');
+}
+function applyCustomColor(){
+  const c=document.getElementById('custom-color').value.trim();
+  if(!/^#[0-9A-Fa-f]{6}$/.test(c)){toast('Formato inválido. Usá #RRGGBB');return;}
+  cfg.accentColor=c;cfg.accentColorLt=c;
+  applyThemeCSS(c,c);
+  toast('Color personalizado aplicado');
+}
+
+/* DAYS */
+function renderDaysConfig(){
+  document.getElementById('days-config').innerHTML=Object.entries(cfg.dias).map(([dow,d])=>`
+    <div class="day-row ${d.activo?'':'day-disabled'}" id="dayrow-${dow}">
+      <label class="day-toggle"><input type="checkbox" ${d.activo?'checked':''} onchange="toggleDay(${dow},this.checked)"><span class="day-slider"></span></label>
+      <div class="day-name">${d.nombre}</div>
+      <div class="day-times">
+        <input type="time" value="${d.desde}" onchange="setDayTime(${dow},'desde',this.value)">
+        <span>→</span>
+        <input type="time" value="${d.hasta}" onchange="setDayTime(${dow},'hasta',this.value)">
+      </div>
+    </div>`).join('');
+}
+function toggleDay(dow,val){
+  cfg.dias[dow].activo=val;
+  const row=document.getElementById('dayrow-'+dow);
+  if(val)row.classList.remove('day-disabled');else row.classList.add('day-disabled');
+}
+function setDayTime(dow,field,val){cfg.dias[dow][field]=val;}
+
+/* BLOQUEADOS */
+function renderBloqueados(){
+  const el=document.getElementById('list-bloqueados');
+  if(!cfg.bloqueados||!cfg.bloqueados.length){el.innerHTML='<p style="font-size:12px;color:var(--muted);">Sin fechas bloqueadas.</p>';return;}
+  el.innerHTML=cfg.bloqueados.map((b,i)=>`
+    <div class="admin-item">
+      <div class="admin-item-emoji">🚫</div>
+      <div class="admin-item-info"><div class="admin-item-name">${b.fecha}</div><div class="admin-item-sub">${b.motivo||''}</div></div>
+      <div class="admin-item-actions"><button class="icon-btn danger" onclick="removeBloqueo(${i})">🗑</button></div>
+    </div>`).join('');
+}
+function addBloqueo(){
+  const f=document.getElementById('new-bloqueo-fecha').value;
+  if(!f){toast('Elegí una fecha');return;}
+  cfg.bloqueados=cfg.bloqueados||[];
+  cfg.bloqueados.push({fecha:f,motivo:document.getElementById('new-bloqueo-motivo').value.trim()});
+  document.getElementById('new-bloqueo-fecha').value='';
+  document.getElementById('new-bloqueo-motivo').value='';
+  renderBloqueados();toast('✅ Fecha bloqueada');
+}
+function removeBloqueo(i){cfg.bloqueados.splice(i,1);renderBloqueados();}
+
+/* GALERÍA */
+function addGalleryPhotos(input){
+  Array.from(input.files).forEach(file=>{
+    const r=new FileReader();
+    r.onload=e=>{cfg.galeria=cfg.galeria||[];cfg.galeria.push(e.target.result);renderGalleryAdmin();renderGalleryClient();};
+    r.readAsDataURL(file);
+  });
+  input.value='';toast('✅ Foto(s) agregada(s)');
+}
+function renderGalleryAdmin(){
+  const g=document.getElementById('gallery-admin-grid');
+  if(!cfg.galeria||!cfg.galeria.length){g.innerHTML='<div style="grid-column:1/-1;font-size:12px;color:var(--muted);padding:8px 0;">Sin fotos aún.</div>';return;}
+  g.innerHTML=cfg.galeria.map((src,i)=>`
+    <div class="gallery-admin-item">
+      <img src="${src}" alt="">
+      <button class="gallery-del" onclick="removeGallery(${i})">✕</button>
+    </div>`).join('');
+}
+function removeGallery(i){cfg.galeria.splice(i,1);renderGalleryAdmin();renderGalleryClient();}
+
+/* CATÁLOGO */
+function renderAdminList(type){
+  const el=document.getElementById('list-'+type);
+  const items=cfg[type]||[];
+  if(!items.length){el.innerHTML='<p style="font-size:12px;color:var(--muted);">Sin elementos.</p>';return;}
+  el.innerHTML=items.map((item,i)=>{
+    let thumbHtml;
+    if(item.img){
+      thumbHtml=`<img src="${item.img}" style="width:36px;height:36px;border-radius:6px;object-fit:cover;flex-shrink:0;" alt="">`;
+    } else if(item.color){
+      thumbHtml=`<span style="display:inline-block;width:28px;height:28px;border-radius:50%;background:${item.color};flex-shrink:0;"></span>`;
+    } else {
+      thumbHtml=`<div class="admin-item-emoji">${item.emoji||'🔹'}</div>`;
+    }
+    return `<div class="admin-item">
+      ${thumbHtml}
+      <div class="admin-item-info">
+        <div class="admin-item-name">${esc(item.nombre)}</div>
+        ${item.desc?`<div class="admin-item-sub">${esc(item.desc)}</div>`:''}
+        ${item.precio&&item.precio!='0'?`<div class="admin-item-price">$ ${item.precio}</div>`:''}
+      </div>
+      <div class="admin-item-actions"><button class="icon-btn danger" onclick="removeItem('${type}',${i})">🗑</button></div>
+    </div>`;
+  }).join('');
+}
+function toggleForm(id){document.getElementById(id).classList.toggle('open');}
+
+function previewItemImg(input,nameId,dataId){
+  const file=input.files[0];if(!file)return;
+  const r=new FileReader();
+  r.onload=e=>{document.getElementById(dataId).value=e.target.result;document.getElementById(nameId).textContent=file.name;};
+  r.readAsDataURL(file);
+}
+
+function addItem(type){
+  let item={};
+  if(type==='tinturas'){
+    item={nombre:document.getElementById('new-tintura-nombre').value.trim(),color:document.getElementById('new-tintura-color').value||'#888',precio:document.getElementById('new-tintura-precio').value.trim()};
+    if(!item.nombre){toast('Ingresá el nombre');return;}
+    ['new-tintura-nombre','new-tintura-color','new-tintura-precio'].forEach(id=>document.getElementById(id).value='');
+  } else {
+    const m={cortes:'corte',barba:'barba',productos:'prod'};const p=m[type];
+    const imgData=document.getElementById(`new-${p}-img-data`)?.value||null;
+    item={emoji:document.getElementById(`new-${p}-emoji`).value||'✂️',
+          nombre:document.getElementById(`new-${p}-nombre`).value.trim(),
+          desc:document.getElementById(`new-${p}-desc`).value.trim(),
+          precio:document.getElementById(`new-${p}-precio`).value.trim(),
+          img:imgData};
+    if(!item.nombre){toast('Ingresá el nombre');return;}
+    [`new-${p}-emoji`,`new-${p}-nombre`,`new-${p}-desc`,`new-${p}-precio`].forEach(id=>document.getElementById(id).value='');
+    const imgEl=document.getElementById(`new-${p}-img-data`);
+    const nameEl=document.getElementById(`new-${p}-img-name`);
+    if(imgEl)imgEl.value='';if(nameEl)nameEl.textContent='Subir imagen';
+  }
+  cfg[type].push(item);renderAdminList(type);toast('✅ Agregado');
+}
+function removeItem(type,i){if(!confirm('¿Eliminar?'))return;cfg[type].splice(i,1);renderAdminList(type);toast('Eliminado');}
+function setColor(hex){document.getElementById('new-tintura-color').value=hex;}
+
+/* LOGO */
+function uploadLogo(input){
+  const file=input.files[0];if(!file)return;
+  const r=new FileReader();
+  r.onload=e=>{
+    cfg.logoImg=e.target.result;
+    document.getElementById('logo-preview').src=e.target.result;
+    document.getElementById('logo-preview-wrap').style.display='block';
+    applyLogoToHeader();
+    toast('✅ Logo subido');
+  };
+  r.readAsDataURL(file);
+}
+function removeLogo(){
+  cfg.logoImg=null;
+  document.getElementById('logo-preview-wrap').style.display='none';
+  applyLogoToHeader();
+  toast('Logo quitado');
+}
+
+/* SAVE */
+function saveConfig(){
+  cfg.nombre=document.getElementById('cfg-nombre').value.trim()||cfg.nombre;
+  cfg.eslogan=document.getElementById('cfg-eslogan').value.trim()||cfg.eslogan;
+  cfg.whatsapp=document.getElementById('cfg-whatsapp').value.trim()||cfg.whatsapp;
+  cfg.duracion=parseInt(document.getElementById('cfg-duracion').value)||30;
+  cfg.confirmacion=document.getElementById('cfg-confirmacion').value.trim();
+  cfg.conocimiento=document.getElementById('cfg-conocimiento').value.trim();
+  cfg.iaMotor=document.getElementById('cfg-ia-motor').value||'claude';
+  const ak=document.getElementById('cfg-apikey').value.trim();
+  if(ak)cfg.apikey=ak;
+  const gk=document.getElementById('cfg-geminikey').value.trim();
+  if(gk)cfg.geminikey=gk;
+  const fbKey=document.getElementById('cfg-fb-apikey').value.trim();
+  const fbProject=document.getElementById('cfg-fb-projectid').value.trim();
+  const fbBucket=document.getElementById('cfg-fb-bucket').value.trim();
+  if(fbKey)cfg.fbApiKey=fbKey;
+  if(fbProject)cfg.fbProjectId=fbProject;
+  if(fbBucket)cfg.fbBucket=fbBucket;
+  const np=document.getElementById('cfg-password').value;
+  if(np.length>=4)cfg.password=np;
+  localStorage.setItem('bs_pro_cfg',JSON.stringify(cfg));
+  applyBranding();renderApp();
+  toast('✅ Configuración guardada');
+}
+
+/* STATS */
+function renderStats(){
+  const p=stats.pedidos||[];const r=stats.resenas||[];
+  document.getElementById('stat-pedidos').textContent=p.length;
+  document.getElementById('stat-resenas').textContent=r.length;
+  document.getElementById('stat-turnos').textContent=stats.turnosAgendados||0;
+  document.getElementById('stat-ai').textContent=stats.analisisIA||0;
+  const prom=r.length?Math.round(r.reduce((a,x)=>a+x.estrellas,0)/r.length*10)/10:'—';
+  document.getElementById('stat-estrellas').textContent=prom;
+  const ingresos=p.reduce((a,x)=>a+(x.total||0),0);
+  document.getElementById('stat-ingresos').textContent='$'+ingresos;
+  const rl=document.getElementById('recent-list');
+  if(!p.length){rl.innerHTML='<p style="font-size:12px;color:var(--muted);">Sin pedidos aún.</p>';}
+  else rl.innerHTML=p.slice(0,50).map(x=>`
+    <div class="recent-item">
+      <div class="recent-item-top">
+        <div class="recent-item-name">${x.corte||'Sin corte'}${x.aiUsado?' 🤖':''}</div>
+        <div class="recent-item-date">${x.fecha} ${x.hora!=='—'?x.hora:''}</div>
+      </div>
+      <div class="recent-item-detail">${[x.perfil,x.barba,x.tintura].filter(Boolean).join(' · ')}</div>
+      ${x.total?`<div class="recent-item-total">$ ${x.total}</div>`:''}
+    </div>`).join('');
+  const ra=document.getElementById('reviews-admin-list');
+  if(!r.length)ra.innerHTML='<p style="font-size:12px;color:var(--muted);">Sin reseñas aún.</p>';
+  else ra.innerHTML=r.slice(0,20).map(x=>`
+    <div class="review-card">
+      <div class="review-stars">${'⭐'.repeat(x.estrellas)}</div>
+      ${x.texto?`<div class="review-text">${esc(x.texto)}</div>`:''}
+      <div class="review-meta">${new Date(x.ts).toLocaleDateString('es-UY')}</div>
+    </div>`).join('');
+}
+function clearStats(){stats={pedidos:[],resenas:[],turnosAgendados:0,analisisIA:0};saveStats();renderStats();toast('Estadísticas borradas');}
+
+// ══════════════════════════════
+// PWA
+// ══════════════════════════════
+function setupPWA(){
+  window.addEventListener('beforeinstallprompt',e=>{
+    e.preventDefault();deferredPrompt=e;
+    document.getElementById('install-banner').classList.add('show');
+  });
+  window.addEventListener('appinstalled',()=>{
+    document.getElementById('install-banner').classList.remove('show');
+    toast('✅ App instalada');
+  });
+}
+function installPWA(){
+  if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(()=>{deferredPrompt=null;});}
+}
+
+/* TOAST */
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2400);
+}
+
+init();
+
+// ══════════════════════════════
+// DEMO SYSTEM
+// ══════════════════════════════
+let demoInterval=null;
+function iniciarDemo(){
+  const minutos=parseInt(document.getElementById('cfg-demo-minutos').value)||60;
+  const msg=document.getElementById('cfg-demo-msg').value.trim()||'¡Gracias por probar la app!';
+  const expira=Date.now()+minutos*60*1000;
+  localStorage.setItem('bs_demo_expira',expira);
+  localStorage.setItem('bs_demo_msg',msg);
+  saveConfig();
+  showView('app');
+  startDemoTimer();
+  toast('✅ Demo iniciado — '+minutos+' minutos');
+}
+function startDemoTimer(){
+  const expira=parseInt(localStorage.getItem('bs_demo_expira')||'0');
+  if(!expira)return;
+  const msg=localStorage.getItem('bs_demo_msg')||'';
+  document.getElementById('demo-bar').classList.add('show');
+  document.getElementById('demo-end-msg').textContent=msg;
+  if(demoInterval)clearInterval(demoInterval);
+  demoInterval=setInterval(()=>{
+    const resta=expira-Date.now();
+    if(resta<=0){
+      clearInterval(demoInterval);
+      localStorage.removeItem('bs_demo_expira');
+      showView('demo-end');
+      return;
+    }
+    const mins=Math.floor(resta/60000);
+    const secs=Math.floor((resta%60000)/1000);
+    const el=document.getElementById('demo-timer');
+    el.textContent=String(mins).padStart(2,'0')+':'+String(secs).padStart(2,'0');
+    if(resta<5*60*1000)el.classList.add('urgent');
+    else el.classList.remove('urgent');
+  },1000);
+}
+function loadDemoState(){
+  const expira=parseInt(localStorage.getItem('bs_demo_expira')||'0');
+  if(expira&&expira>Date.now()){startDemoTimer();return false;}
+  if(expira&&expira<=Date.now()){
+    localStorage.removeItem('bs_demo_expira');
+    const msg=localStorage.getItem('bs_demo_msg')||'';
+    const el=document.getElementById('demo-end-msg');
+    if(el)el.textContent=msg;
+    showView('demo-end');
+    return true;
+  }
+  return false;
+}
+// Patch loadAdminForm for demo fields
+const _origLoadAdmin = loadAdminForm;
+loadAdminForm = function(){
+  _origLoadAdmin();
+  const dm = cfg.demo||{};
+  const da=document.getElementById('cfg-demo-activo');
+  const dmin=document.getElementById('cfg-demo-minutos');
+  const dmsg=document.getElementById('cfg-demo-msg');
+  if(da)da.value=dm.activo?'1':'0';
+  if(dmin)dmin.value=dm.minutos||60;
+  if(dmsg)dmsg.value=dm.msg||'';
+};
+// Patch saveConfig for demo fields
+const _origSave = saveConfig;
+saveConfig = function(){
+  _origSave();
+  cfg.demo={
+    activo:document.getElementById('cfg-demo-activo')?.value==='1',
+    minutos:parseInt(document.getElementById('cfg-demo-minutos')?.value)||60,
+    msg:document.getElementById('cfg-demo-msg')?.value.trim()||'',
+  };
+  localStorage.setItem( + key + r,JSON.stringify(cfg));
+};
+// Patch init to check demo state
+const _origInit = init;
+init = function(){
+  _origInit();
+  if(!loadDemoState()) showView('app');
+};
+</script>
+</body>
+</html>
